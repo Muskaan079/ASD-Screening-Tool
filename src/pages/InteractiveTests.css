@@ -1,0 +1,109 @@
+.interactive-tests-container {
+  min-height: 100vh;
+  padding: 2rem;
+  background-color: #f5f5f5;
+}
+
+.tests-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.tests-header h1 {
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.tests-header p {
+  color: #7f8c8d;
+  font-size: 1.1rem;
+}
+
+.tests-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.test-card {
+  background-color: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.test-card:hover {
+  transform: translateY(-5px);
+}
+
+.test-card-content {
+  padding: 1.5rem;
+}
+
+.test-card h3 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+}
+
+.test-card p {
+  color: #7f8c8d;
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+
+.duration {
+  display: block;
+  color: #95a5a6;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.start-test-btn {
+  width: 100%;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.start-test-btn:hover {
+  background-color: #2980b9;
+}
+
+.test-interface {
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.test-interface h2 {
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+}
+
+.back-btn {
+  background-color: #95a5a6;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+  margin-top: 1.5rem;
+}
+
+.back-btn:hover {
+  background-color: #7f8c8d;
+} 

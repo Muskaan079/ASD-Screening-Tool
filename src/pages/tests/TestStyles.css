@@ -1,0 +1,310 @@
+.test-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.test-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.test-header h1 {
+  color: #2c3e50;
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.test-header p {
+  color: #7f8c8d;
+  font-size: 1.2rem;
+}
+
+.test-content {
+  background-color: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.test-instructions {
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #e1e8ed;
+}
+
+.test-instructions h2 {
+  color: #2c3e50;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.test-instructions p {
+  color: #7f8c8d;
+  line-height: 1.6;
+}
+
+.test-rules {
+  margin-top: 1.5rem;
+  padding-left: 1.5rem;
+}
+
+.test-rules li {
+  color: #7f8c8d;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.test-placeholder {
+  text-align: center;
+  padding: 3rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  color: #95a5a6;
+}
+
+.test-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.primary-button,
+.secondary-button {
+  padding: 1rem 2rem;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  border: none;
+}
+
+.primary-button {
+  background-color: #3498db;
+  color: white;
+}
+
+.primary-button:hover {
+  background-color: #2980b9;
+}
+
+.secondary-button {
+  background-color: #95a5a6;
+  color: white;
+}
+
+.secondary-button:hover {
+  background-color: #7f8c8d;
+}
+
+/* Emotion Test Specific Styles */
+.emotion-test {
+  text-align: center;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background-color: #ecf0f1;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 1rem;
+}
+
+.progress {
+  height: 100%;
+  background-color: #3498db;
+  transition: width 0.3s ease;
+}
+
+.emotion-image {
+  margin: 2rem 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.emotion-image img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.emotion-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.emotion-option {
+  padding: 1rem;
+  border: 2px solid #e1e8ed;
+  border-radius: 6px;
+  background-color: white;
+  color: #2c3e50;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.emotion-option:hover {
+  background-color: #3498db;
+  border-color: #3498db;
+  color: white;
+}
+
+.loading,
+.error {
+  text-align: center;
+  padding: 2rem;
+  color: #7f8c8d;
+}
+
+.error {
+  color: #e74c3c;
+}
+
+@media (max-width: 768px) {
+  .test-container {
+    padding: 1rem;
+  }
+
+  .test-header h1 {
+    font-size: 2rem;
+  }
+
+  .test-content {
+    padding: 1.5rem;
+  }
+
+  .test-actions {
+    flex-direction: column;
+  }
+
+  .test-actions button {
+    width: 100%;
+  }
+
+  .emotion-options {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Reaction Test Specific Styles */
+.reaction-test {
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+}
+
+.reaction-test.active {
+  background-color: #2ecc71;
+}
+
+.reaction-area {
+  width: 100%;
+  padding: 3rem;
+  text-align: center;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+}
+
+.reaction-test.active .reaction-area {
+  background-color: transparent;
+}
+
+.reaction-area p {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.reaction-test.active .reaction-area p {
+  color: white;
+}
+
+.trial-results {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.trial-result {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.trial-result.valid {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.trial-result.invalid {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+/* Pattern Test Specific Styles */
+.pattern-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.pattern-tile {
+  aspect-ratio: 1;
+  background-color: #f8f9fa;
+  border: 2px solid #e1e8ed;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pattern-tile:hover:not(.highlighted) {
+  background-color: #e9ecef;
+}
+
+.pattern-tile.highlighted {
+  background-color: #3498db;
+  border-color: #2980b9;
+}
+
+.pattern-tile.selected {
+  background-color: #2ecc71;
+  border-color: #27ae60;
+}
+
+.pattern-controls {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.pattern-status {
+  font-size: 1.2rem;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+}
+
+.pattern-controls button {
+  margin: 0 0.5rem;
+}
+
+.pattern-controls button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+} 
