@@ -46,8 +46,8 @@ const callOpenAI = async (_prompt: string): Promise<string> => {
   // const data = await response.json();
   // return data.choices[0].message.content;
 
-  // Mock response for development - reduced delay
-  await new Promise(resolve => setTimeout(resolve, 500)); // Reduced from 2000ms to 500ms
+  // Mock response for development - minimal delay
+  await new Promise(resolve => setTimeout(resolve, 100)); // Very short delay
   
   const mockReport = {
     summary: "The screening session revealed several areas of interest related to social communication and sensory processing. The participant demonstrated consistent patterns in their responses that warrant further clinical evaluation.",
