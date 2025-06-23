@@ -1,36 +1,6 @@
 import React from 'react';
-import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 const MedicalVisualizations: React.FC = () => {
-  // Sample data for radar chart (DSM-5 criteria)
-  const radarData = [
-    { criterion: 'Social Reciprocity', score: 65, fullMark: 100 },
-    { criterion: 'Nonverbal Comm.', score: 45, fullMark: 100 },
-    { criterion: 'Relationships', score: 75, fullMark: 100 },
-    { criterion: 'Stereotyped Behaviors', score: 40, fullMark: 100 },
-    { criterion: 'Insistence on Sameness', score: 55, fullMark: 100 },
-    { criterion: 'Restricted Interests', score: 70, fullMark: 100 },
-    { criterion: 'Sensory Processing', score: 50, fullMark: 100 },
-  ];
-
-  // Sample data for progress chart
-  const progressData = [
-    { name: 'Social Skills', completed: 35, total: 100 },
-    { name: 'Communication', completed: 45, total: 100 },
-    { name: 'Behavioral Flexibility', completed: 30, total: 100 },
-    { name: 'Sensory Integration', completed: 50, total: 100 },
-    { name: 'Executive Function', completed: 40, total: 100 },
-  ];
-
-  // Sample data for risk heatmap
-  const riskData = [
-    { domain: 'Social', risk: 75, impact: 'High' },
-    { domain: 'Communication', risk: 45, impact: 'Medium' },
-    { domain: 'Behavioral', risk: 70, impact: 'High' },
-    { domain: 'Sensory', risk: 50, impact: 'Medium' },
-    { domain: 'Cognitive', risk: 40, impact: 'Low' },
-  ];
-
   return (
     <div style={{ marginBottom: 40 }}>
       <h2 style={{ color: '#333', borderBottom: '2px solid #eee', paddingBottom: 15, fontSize: '1.8rem' }}>Clinical Visualizations</h2>
@@ -43,7 +13,7 @@ const MedicalVisualizations: React.FC = () => {
         marginBottom: 30
       }}>
         
-        {/* Radar Chart Section */}
+        {/* DSM-5 Criteria Assessment */}
         <div style={{ marginBottom: 50 }}>
           <h3 style={{ color: '#333', marginBottom: 25, fontSize: '1.5rem', textAlign: 'center' }}>
             📊 DSM-5 Criteria Assessment Radar
@@ -55,30 +25,52 @@ const MedicalVisualizations: React.FC = () => {
             boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
             border: '1px solid #e9ecef'
           }}>
-            <ResponsiveContainer width="100%" height={500}>
-              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
-                <PolarGrid stroke="#e0e0e0" />
-                <PolarAngleAxis 
-                  dataKey="criterion" 
-                  tick={{ fontSize: 14, fill: '#333' }}
-                  tickLine={{ stroke: '#666' }}
-                />
-                <PolarRadiusAxis 
-                  angle={90} 
-                  domain={[0, 100]} 
-                  tick={{ fontSize: 12, fill: '#666' }}
-                  tickLine={{ stroke: '#ccc' }}
-                />
-                <Radar
-                  name="Assessment Score"
-                  dataKey="score"
-                  stroke="#2E86AB"
-                  fill="#2E86AB"
-                  fillOpacity={0.6}
-                  strokeWidth={3}
-                />
-              </RadarChart>
-            </ResponsiveContainer>
+            <div style={{ 
+              width: '100%', 
+              height: 400, 
+              display: 'flex', 
+              justifyContent: 'center', 
+              alignItems: 'center',
+              background: 'linear-gradient(45deg, #f0f8ff, #e6f3ff)',
+              borderRadius: 12
+            }}>
+              <div style={{
+                width: 300,
+                height: 300,
+                borderRadius: '50%',
+                background: 'conic-gradient(from 0deg, #2E86AB 0deg 65deg, #e9ecef 65deg 360deg)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+              }}>
+                <div style={{
+                  width: 200,
+                  height: 200,
+                  borderRadius: '50%',
+                  background: 'conic-gradient(from 0deg, #ffc107 0deg 55deg, #e9ecef 55deg 360deg)',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center'
+                }}>
+                  <div style={{
+                    width: 100,
+                    height: 100,
+                    borderRadius: '50%',
+                    background: 'conic-gradient(from 0deg, #fd7e14 0deg 70deg, #e9ecef 70deg 360deg)',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    fontSize: 16
+                  }}>
+                    MODERATE
+                  </div>
+                </div>
+              </div>
+            </div>
+            
             <div style={{ textAlign: 'center', marginTop: 20 }}>
               <p style={{ fontSize: 16, color: '#666', lineHeight: 1.6 }}>
                 <strong>Interpretation:</strong> Higher scores indicate greater clinical concerns. 
@@ -88,7 +80,7 @@ const MedicalVisualizations: React.FC = () => {
           </div>
         </div>
 
-        {/* Progress Charts Section */}
+        {/* Progress Assessment */}
         <div style={{ marginBottom: 50 }}>
           <h3 style={{ color: '#333', marginBottom: 25, fontSize: '1.5rem', textAlign: 'center' }}>
             📈 Developmental Progress Assessment
@@ -100,41 +92,51 @@ const MedicalVisualizations: React.FC = () => {
             boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
             border: '1px solid #e9ecef'
           }}>
-            <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={progressData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-                <XAxis 
-                  dataKey="name" 
-                  tick={{ fontSize: 14, fill: '#333' }}
-                  tickLine={{ stroke: '#666' }}
-                />
-                <YAxis 
-                  tick={{ fontSize: 12, fill: '#666' }}
-                  tickLine={{ stroke: '#ccc' }}
-                />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'white', 
-                    border: '1px solid #ccc',
-                    borderRadius: 8,
-                    fontSize: 14
-                  }}
-                />
-                <Legend />
-                <Bar dataKey="completed" fill="#2E86AB" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="total" fill="#e9ecef" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-            <div style={{ textAlign: 'center', marginTop: 20 }}>
-              <p style={{ fontSize: 16, color: '#666', lineHeight: 1.6 }}>
-                <strong>Progress Tracking:</strong> Blue bars show current achievement levels. 
-                Gray bars represent target goals for typical development.
-              </p>
+            <div style={{ display: 'grid', gap: 20 }}>
+              {[
+                { name: 'Social Skills', completed: 35 },
+                { name: 'Communication', completed: 45 },
+                { name: 'Behavioral Flexibility', completed: 30 },
+                { name: 'Sensory Integration', completed: 50 },
+                { name: 'Executive Function', completed: 40 }
+              ].map((item, index) => (
+                <div key={index} style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+                  <div style={{ width: 150, fontSize: 16, fontWeight: 'bold', color: '#333' }}>
+                    {item.name}
+                  </div>
+                  <div style={{ 
+                    flex: 1, 
+                    height: 30, 
+                    background: '#e9ecef', 
+                    borderRadius: 15,
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}>
+                    <div style={{
+                      width: `${item.completed}%`,
+                      height: '100%',
+                      background: '#2E86AB',
+                      borderRadius: 15
+                    }}></div>
+                    <div style={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      color: '#333',
+                      fontWeight: 'bold',
+                      fontSize: 14
+                    }}>
+                      {item.completed}%
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Risk Assessment Heatmap */}
+        {/* Risk Assessment Matrix */}
         <div style={{ marginBottom: 50 }}>
           <h3 style={{ color: '#333', marginBottom: 25, fontSize: '1.5rem', textAlign: 'center' }}>
             🔥 Clinical Risk Assessment Matrix
@@ -147,7 +149,13 @@ const MedicalVisualizations: React.FC = () => {
             border: '1px solid #e9ecef'
           }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20 }}>
-              {riskData.map((item, index) => (
+              {[
+                { domain: 'Social', risk: 75, impact: 'High' },
+                { domain: 'Communication', risk: 45, impact: 'Medium' },
+                { domain: 'Behavioral', risk: 70, impact: 'High' },
+                { domain: 'Sensory', risk: 50, impact: 'Medium' },
+                { domain: 'Cognitive', risk: 40, impact: 'Low' }
+              ].map((item, index) => (
                 <div key={index} style={{ textAlign: 'center' }}>
                   <div style={{
                     width: 120,
@@ -180,12 +188,6 @@ const MedicalVisualizations: React.FC = () => {
                 </div>
               ))}
             </div>
-            <div style={{ textAlign: 'center', marginTop: 30 }}>
-              <p style={{ fontSize: 16, color: '#666', lineHeight: 1.6 }}>
-                <strong>Risk Levels:</strong> Red (70%+) indicates high priority for intervention. 
-                Orange (50-69%) suggests moderate concern. Green (below 50%) shows typical development.
-              </p>
-            </div>
           </div>
         </div>
 
@@ -207,7 +209,6 @@ const MedicalVisualizations: React.FC = () => {
               alignItems: 'center',
               gap: 20
             }}>
-              {/* Start */}
               <div style={{
                 padding: '20px 40px',
                 background: '#2E86AB',
@@ -215,16 +216,13 @@ const MedicalVisualizations: React.FC = () => {
                 borderRadius: 12,
                 fontWeight: 'bold',
                 fontSize: 18,
-                textAlign: 'center',
-                boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+                textAlign: 'center'
               }}>
                 Screening Assessment Complete
               </div>
               
-              {/* Arrow */}
               <div style={{ fontSize: 24, color: '#666' }}>↓</div>
               
-              {/* Decision */}
               <div style={{
                 padding: '20px 40px',
                 background: '#ffc107',
@@ -232,17 +230,13 @@ const MedicalVisualizations: React.FC = () => {
                 borderRadius: 12,
                 fontWeight: 'bold',
                 fontSize: 18,
-                textAlign: 'center',
-                border: '2px solid #e6c200',
-                boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+                textAlign: 'center'
               }}>
                 Moderate Severity Detected
               </div>
               
-              {/* Arrow */}
               <div style={{ fontSize: 24, color: '#666' }}>↓</div>
               
-              {/* Recommendations */}
               <div style={{
                 padding: '20px 40px',
                 background: '#28a745',
@@ -250,35 +244,9 @@ const MedicalVisualizations: React.FC = () => {
                 borderRadius: 12,
                 fontWeight: 'bold',
                 fontSize: 18,
-                textAlign: 'center',
-                boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
-              }}>
-                Refer to Specialist for Comprehensive Evaluation
-              </div>
-              
-              {/* Next Steps */}
-              <div style={{ 
-                marginTop: 20, 
-                padding: 20, 
-                background: '#f8f9fa', 
-                borderRadius: 12,
-                border: '1px solid #e9ecef',
                 textAlign: 'center'
               }}>
-                <h4 style={{ margin: '0 0 12px 0', color: '#333', fontSize: 16 }}>Recommended Next Steps:</h4>
-                <ul style={{ 
-                  margin: 0, 
-                  padding: 0, 
-                  listStyle: 'none',
-                  fontSize: 14,
-                  color: '#666',
-                  lineHeight: 1.8
-                }}>
-                  <li>• Schedule comprehensive diagnostic evaluation</li>
-                  <li>• Consult with developmental pediatrician</li>
-                  <li>• Begin early intervention planning</li>
-                  <li>• Monitor progress with follow-up assessments</li>
-                </ul>
+                Refer to Specialist for Comprehensive Evaluation
               </div>
             </div>
           </div>
