@@ -1001,13 +1001,7 @@ IMPORTANT: This is a screening report only and should not be used for diagnosis.
         <section style={{ marginBottom: 30 }}>
           <h2 style={{ color: '#333', borderBottom: '1px solid #eee', paddingBottom: 10 }}>Clinical Data Visualizations</h2>
           
-          <MedicalVisualizations
-            clinicalRadarData={finalClinicalRadarData}
-            progressData={finalProgressData}
-            clinicalRiskData={finalClinicalRiskData}
-            decisionTree={decisionTree}
-            medicalColors={medicalColors}
-          />
+          <MedicalVisualizations />
           
           {/* Test Visualization - Always Show */}
           <div style={{ 
