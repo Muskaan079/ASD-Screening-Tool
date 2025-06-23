@@ -6,7 +6,6 @@ import { EmotionLogEntry } from '../services/reportGenerator';
 import { ReasoningFactor } from './ReasoningVisualizer';
 import FaceEmotionTracker from './FaceEmotionTracker';
 import ReasoningVisualizer from './ReasoningVisualizer';
-import ReportPage from '../pages/Report';
 
 interface Message {
   sender: 'system' | 'user';
@@ -35,7 +34,6 @@ const ChatInterface: React.FC = () => {
   const [currentEmotion, setCurrentEmotion] = useState<string>('neutral');
   const [emotionConfidence, setEmotionConfidence] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [showReport, setShowReport] = useState(false);
   const [emotionLog, setEmotionLog] = useState<EmotionLogEntry[]>([]);
   const [sessionStartTime] = useState<Date>(new Date());
   const navigate = useNavigate();
@@ -286,82 +284,42 @@ const ChatInterface: React.FC = () => {
       .filter(entry => entry.response);
   };
 
-  if (showReport) {
-    return (
-      <ReportPage
-        history={getConversationHistory()}
-        emotionLog={emotionLog}
-        sessionDuration={sessionDuration}
-        onBackToChat={() => setShowReport(false)}
-      />
-    );
-  }
-
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', padding: 16 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: 20 }}>
+    <div className="container">
+      <div className="chat-grid">
         {/* Chat Section */}
-        <div style={{ border: '1px solid #ccc', borderRadius: 8, padding: 16, background: '#fff' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <h3 style={{ margin: 0, color: '#333' }}>Adaptive Screening Chat</h3>
-            <div style={{ display: 'flex', gap: 8 }}>
+        <div className="chat-section">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+            <h3 style={{ margin: 0, color: '#333', fontSize: '1.5rem' }}>Adaptive Screening Chat</h3>
+            <div style={{ display: 'flex', gap: 12 }}>
               <button
                 onClick={() => navigate('/')}
-                style={{
-                  padding: '8px 16px',
-                  background: '#f0f0f0',
-                  border: 'none',
-                  borderRadius: 6,
-                  color: '#333',
-                  cursor: 'pointer',
-                  fontSize: '0.9rem'
-                }}
+                className="btn btn-secondary"
               >
                 ← Home
               </button>
               <button
                 onClick={handleFinishAndGenerateReport}
-                style={{
-                  padding: '8px 16px',
-                  background: '#4caf50',
-                  border: 'none',
-                  borderRadius: 6,
-                  color: '#fff',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8
-                }}
-                disabled={messages.length < 3} // Need at least initial greeting + 1 Q&A pair
+                className="btn btn-success"
+                disabled={messages.length < 3}
               >
                 📋 Finish & Generate Report
               </button>
             </div>
           </div>
           
-          <div style={{ minHeight: 300, marginBottom: 16, maxHeight: 400, overflowY: 'auto' }}>
+          <div className="chat-messages">
             {messages.map((msg, idx) => (
               <div key={idx}>
-                <div style={{ textAlign: msg.sender === 'user' ? 'right' : 'left', margin: '8px 0' }}>
-                  <span
-                    style={{
-                      display: 'inline-block',
-                      padding: '8px 12px',
-                      borderRadius: 16,
-                      background: msg.sender === 'user' ? '#61dafb' : '#eee',
-                      color: msg.sender === 'user' ? '#222' : '#333',
-                      maxWidth: '80%',
-                      wordBreak: 'break-word',
-                    }}
-                  >
+                <div className={`message ${msg.sender === 'user' ? 'message-user' : 'message-system'}`}>
+                  <span className={`message-bubble ${msg.sender === 'user' ? 'message-bubble-user' : 'message-bubble-system'}`}>
                     {msg.text}
                   </span>
                   {msg.emotion && msg.sender === 'user' && (
                     <div style={{ 
-                      fontSize: 11, 
+                      fontSize: 12, 
                       color: '#666', 
-                      marginTop: 4,
+                      marginTop: 6,
                       textAlign: msg.sender === 'user' ? 'right' : 'left'
                     }}>
                       Emotion: {msg.emotion} ({(msg.emotionConfidence! * 100).toFixed(1)}%)
@@ -369,9 +327,9 @@ const ChatInterface: React.FC = () => {
                   )}
                   {msg.domain && msg.sender === 'system' && msg.domain !== 'Introduction' && (
                     <div style={{ 
-                      fontSize: 11, 
+                      fontSize: 12, 
                       color: '#666', 
-                      marginTop: 4,
+                      marginTop: 6,
                       textAlign: 'left'
                     }}>
                       Domain: {msg.domain} | {msg.reasoning}
@@ -390,36 +348,15 @@ const ChatInterface: React.FC = () => {
               </div>
             ))}
             {isListening && (
-              <div style={{ textAlign: 'left', margin: '8px 0' }}>
-                <span
-                  style={{
-                    display: 'inline-block',
-                    padding: '8px 12px',
-                    borderRadius: 16,
-                    background: '#ffeb3b',
-                    color: '#333',
-                    maxWidth: '80%',
-                    wordBreak: 'break-word',
-                    fontStyle: 'italic',
-                  }}
-                >
+              <div className="message message-system">
+                <span className="message-bubble listening">
                   🎤 {transcript || 'Listening...'}
                 </span>
               </div>
             )}
             {isLoading && (
-              <div style={{ textAlign: 'left', margin: '8px 0' }}>
-                <span
-                  style={{
-                    display: 'inline-block',
-                    padding: '8px 12px',
-                    borderRadius: 16,
-                    background: '#e3f2fd',
-                    color: '#333',
-                    maxWidth: '80%',
-                    fontStyle: 'italic',
-                  }}
-                >
+              <div className="message message-system">
+                <span className="message-bubble loading">
                   🤔 Generating next question...
                 </span>
               </div>
@@ -427,32 +364,25 @@ const ChatInterface: React.FC = () => {
           </div>
           
           {error && (
-            <div style={{ color: 'red', marginBottom: 8, fontSize: 14 }}>
+            <div className="error">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSend} style={{ display: 'flex', gap: 8 }}>
+          <form onSubmit={handleSend} style={{ display: 'flex', gap: 12 }}>
             <input
               type="text"
               value={input}
               onChange={handleInputChange}
               placeholder="Type your response..."
-              style={{ flex: 1, padding: 8, borderRadius: 8, border: '1px solid #ccc' }}
+              className="input"
+              style={{ flex: 1 }}
               disabled={isLoading}
             />
             <button
               type="button"
               onClick={handleMicToggle}
-              style={{
-                padding: '8px 12px',
-                borderRadius: 8,
-                background: isListening ? '#ff4444' : '#61dafb',
-                border: 'none',
-                color: '#222',
-                fontWeight: 'bold',
-                cursor: 'pointer',
-              }}
+              className="btn btn-primary"
               title={isListening ? 'Stop Recording' : 'Start Recording'}
               disabled={isLoading}
             >
@@ -460,15 +390,7 @@ const ChatInterface: React.FC = () => {
             </button>
             <button 
               type="submit" 
-              style={{ 
-                padding: '8px 16px', 
-                borderRadius: 8, 
-                background: isLoading ? '#ccc' : '#61dafb', 
-                border: 'none', 
-                color: '#222', 
-                fontWeight: 'bold',
-                cursor: isLoading ? 'not-allowed' : 'pointer'
-              }}
+              className="btn btn-primary"
               disabled={isLoading}
             >
               Send
@@ -477,25 +399,21 @@ const ChatInterface: React.FC = () => {
         </div>
 
         {/* Emotion Tracker Section */}
-        <div style={{ border: '1px solid #ccc', borderRadius: 8, padding: 16, background: '#fff' }}>
-          <h3 style={{ marginTop: 0, marginBottom: 16, color: '#333' }}>Emotion Detection</h3>
-          <FaceEmotionTracker 
-            onEmotionDetected={handleEmotionDetected}
-            width={350}
-            height={250}
-          />
-          <div style={{ 
-            marginTop: 16, 
-            padding: 12, 
-            background: '#f8f9fa', 
-            borderRadius: 8,
-            fontSize: 14
-          }}>
-            <div style={{ fontWeight: 'bold', marginBottom: 8 }}>Current Status:</div>
-            <div>Emotion: <strong>{currentEmotion}</strong></div>
-            <div>Confidence: <strong>{(emotionConfidence * 100).toFixed(1)}%</strong></div>
-            <div>Session Duration: <strong>{sessionDuration} min</strong></div>
-            <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
+        <div className="emotion-section emotion-tracker">
+          <h3 style={{ marginTop: 0, marginBottom: 20, color: '#333', fontSize: '1.3rem' }}>Emotion Detection</h3>
+          <div className="emotion-tracker-container">
+            <FaceEmotionTracker 
+              onEmotionDetected={handleEmotionDetected}
+              width={350}
+              height={250}
+            />
+          </div>
+          <div className="status-info">
+            <div style={{ fontWeight: 'bold', marginBottom: 12 }}>Current Status:</div>
+            <div style={{ marginBottom: 8 }}>Emotion: <strong>{currentEmotion}</strong></div>
+            <div style={{ marginBottom: 8 }}>Confidence: <strong>{(emotionConfidence * 100).toFixed(1)}%</strong></div>
+            <div style={{ marginBottom: 8 }}>Session Duration: <strong>{sessionDuration} min</strong></div>
+            <div style={{ marginTop: 12, fontSize: 12, color: '#666', lineHeight: '1.4' }}>
               Emotions are used to adapt the screening questions and generate clinical reports.
             </div>
           </div>
