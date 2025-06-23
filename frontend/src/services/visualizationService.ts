@@ -304,7 +304,12 @@ class VisualizationService {
 
   private calculateAttentionSpan(responseTimes: number[], sessionDuration: number): number {
     const avgResponseTime = responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length;
-    const consistency = 1 - (Math.std(responseTimes) / avgResponseTime);
+    
+    // Calculate standard deviation manually
+    const variance = responseTimes.reduce((sum, time) => sum + Math.pow(time - avgResponseTime, 2), 0) / responseTimes.length;
+    const stdDev = Math.sqrt(variance);
+    
+    const consistency = 1 - (stdDev / avgResponseTime);
     return Math.min(1, (sessionDuration / (avgResponseTime * responseTimes.length)) * consistency);
   }
 
@@ -321,7 +326,7 @@ class VisualizationService {
       log.emotionLabel !== emotionLog[index].emotionLabel ? 1 : 0
     );
     
-    const stabilityScore = 1 - (emotionChanges.reduce((a, b) => a + b, 0) / emotionChanges.length);
+    const stabilityScore = 1 - (emotionChanges.reduce((a: number, b: number) => a + b, 0) / emotionChanges.length);
     return Math.max(0, stabilityScore);
   }
 
@@ -483,28 +488,6 @@ class VisualizationService {
 
     return timeline.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
   }
-
-  // Utility function for standard deviation
-  private std(values: number[]): number {
-    const avg = values.reduce((a, b) => a + b, 0) / values.length;
-    const squareDiffs = values.map(value => Math.pow(value - avg, 2));
-    const avgSquareDiff = squareDiffs.reduce((a, b) => a + b, 0) / squareDiffs.length;
-    return Math.sqrt(avgSquareDiff);
-  }
 }
-
-// Extend Math object for standard deviation
-declare global {
-  interface Math {
-    std(values: number[]): number;
-  }
-}
-
-Math.std = function(values: number[]): number {
-  const avg = values.reduce((a, b) => a + b, 0) / values.length;
-  const squareDiffs = values.map(value => Math.pow(value - avg, 2));
-  const avgSquareDiff = squareDiffs.reduce((a, b) => a + b, 0) / squareDiffs.length;
-  return Math.sqrt(avgSquareDiff);
-};
 
 export const visualizationService = new VisualizationService(); 
