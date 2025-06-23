@@ -1,8 +1,8 @@
 import React from 'react';
 import { 
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, 
-  AreaChart, Area, ComposedChart, Line, BarChart, Bar, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend 
+  Area, ComposedChart, Line, BarChart, Bar, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
 
 interface MedicalVisualizationsProps {
@@ -156,7 +156,7 @@ const MedicalVisualizations: React.FC<MedicalVisualizationsProps> = ({
                 tick={{ fontSize: 11, fill: '#333' }}
               />
               <Tooltip 
-                formatter={(value: number, name: string) => [`${value}% risk`, 'Risk Level']}
+                formatter={(value: number, _name: string) => [`${value}% risk`, 'Risk Level']}
                 labelFormatter={(label) => `Domain: ${label}`}
               />
               <Bar 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ConversationEntry } from '../services/adaptiveEngine';
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, AreaChart, Area, ComposedChart } from 'recharts';
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import MedicalVisualizations from '../components/MedicalVisualizations';
 
 export interface EmotionLogEntry {
@@ -192,9 +192,6 @@ const ReportPage: React.FC<ReportPageProps> = ({
 
     return domains.map(domain => {
       const domainQuestions = history.filter(h => h.domain === domain.name);
-      const domainEmotions = emotionLog.filter((_, index) => 
-        domainQuestions.some(q => q.emotion && index < emotionLog.length)
-      );
 
       // Calculate clinical score (0-100)
       let score = 50; // Baseline
@@ -254,8 +251,6 @@ const ReportPage: React.FC<ReportPageProps> = ({
       'Emotional Regulation',
       'Attention & Focus'
     ];
-
-    const severityLevels = ['Low', 'Medium', 'High', 'Critical'];
 
     return riskDomains.map(domain => {
       const domainQuestions = history.filter(h => h.domain === domain);
@@ -974,7 +969,7 @@ IMPORTANT: This is a screening report only and should not be used for diagnosis.
                       fill="#8884d8"
                       dataKey="count"
                     >
-                      {finalDomainCoverageData.map((entry, index) => (
+                      {finalDomainCoverageData.map((_entry, index) => (
                         <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
                       ))}
                     </Pie>
