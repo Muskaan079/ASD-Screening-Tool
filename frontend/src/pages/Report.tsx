@@ -425,6 +425,32 @@ IMPORTANT: This is a screening report only and should not be used for diagnosis.
         <section style={{ marginBottom: 30 }}>
           <h2 style={{ color: '#333', borderBottom: '1px solid #eee', paddingBottom: 10 }}>Data Visualizations</h2>
           
+          {/* Test Visualization - Always Show */}
+          <div style={{ 
+            background: '#f8f9fa', 
+            padding: 20, 
+            borderRadius: 8,
+            border: '1px solid #e9ecef',
+            marginBottom: 20
+          }}>
+            <h3 style={{ color: '#333', marginTop: 0, marginBottom: 16 }}>Test Chart - Should Always Show</h3>
+            <div style={{ height: 200 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={[
+                  { name: 'Domain A', value: 30 },
+                  { name: 'Domain B', value: 45 },
+                  { name: 'Domain C', value: 25 }
+                ]}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="value" fill="#8884d8" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: 24, marginTop: 20 }}>
             
             {/* Emotion Trend Chart */}
@@ -435,59 +461,53 @@ IMPORTANT: This is a screening report only and should not be used for diagnosis.
               border: '1px solid #e9ecef'
             }}>
               <h3 style={{ color: '#333', marginTop: 0, marginBottom: 16 }}>Emotion Trends Over Time</h3>
-              {finalEmotionTrendData.length > 0 ? (
-                <div style={{ height: 250 }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={finalEmotionTrendData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-                      <XAxis 
-                        dataKey="time" 
-                        label={{ value: 'Question Number', position: 'insideBottom', offset: -5 }}
-                        tick={{ fontSize: 12, fill: '#666' }}
-                      />
-                      <YAxis 
-                        tick={{ fontSize: 12, fill: '#666' }}
-                        label={{ value: 'Confidence', angle: -90, position: 'insideLeft' }}
-                      />
-                      <Tooltip 
-                        content={({ active, payload, label }) => {
-                          if (active && payload && payload.length) {
-                            return (
-                              <div style={{
-                                background: '#fff',
-                                border: '1px solid #ddd',
-                                borderRadius: 8,
-                                padding: 12,
-                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                              }}>
-                                <p style={{ margin: 0, fontWeight: 'bold' }}>Question {label}</p>
-                                <p style={{ margin: '4px 0 0 0' }}>
-                                  Emotion: {payload[0].payload.emotion}
-                                </p>
-                                <p style={{ margin: '4px 0 0 0' }}>
-                                  Confidence: {(payload[0].value * 100).toFixed(1)}%
-                                </p>
-                              </div>
-                            );
-                          }
-                          return null;
-                        }}
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="confidence" 
-                        stroke="#8884d8" 
-                        strokeWidth={2}
-                        dot={{ fill: '#8884d8', strokeWidth: 2, r: 4 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              ) : (
-                <div style={{ textAlign: 'center', padding: 40, color: '#666' }}>
-                  No emotion data available
-                </div>
-              )}
+              <div style={{ height: 250 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={finalEmotionTrendData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                    <XAxis 
+                      dataKey="time" 
+                      label={{ value: 'Question Number', position: 'insideBottom', offset: -5 }}
+                      tick={{ fontSize: 12, fill: '#666' }}
+                    />
+                    <YAxis 
+                      tick={{ fontSize: 12, fill: '#666' }}
+                      label={{ value: 'Confidence', angle: -90, position: 'insideLeft' }}
+                    />
+                    <Tooltip 
+                      content={({ active, payload, label }) => {
+                        if (active && payload && payload.length) {
+                          return (
+                            <div style={{
+                              background: '#fff',
+                              border: '1px solid #ddd',
+                              borderRadius: 8,
+                              padding: 12,
+                              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                            }}>
+                              <p style={{ margin: 0, fontWeight: 'bold' }}>Question {label}</p>
+                              <p style={{ margin: '4px 0 0 0' }}>
+                                Emotion: {payload[0].payload.emotion}
+                              </p>
+                              <p style={{ margin: '4px 0 0 0' }}>
+                                Confidence: {(payload[0].value * 100).toFixed(1)}%
+                              </p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="confidence" 
+                      stroke="#8884d8" 
+                      strokeWidth={2}
+                      dot={{ fill: '#8884d8', strokeWidth: 2, r: 4 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
             </div>
 
             {/* Risk Heatmap */}
@@ -498,51 +518,45 @@ IMPORTANT: This is a screening report only and should not be used for diagnosis.
               border: '1px solid #e9ecef'
             }}>
               <h3 style={{ color: '#333', marginTop: 0, marginBottom: 16 }}>Domain Risk Assessment</h3>
-              {finalRiskHeatmapData.length > 0 ? (
-                <div style={{ height: 250 }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={finalRiskHeatmapData} layout="horizontal">
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-                      <XAxis 
-                        type="number" 
-                        domain={[0, 1]}
-                        tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
-                        tick={{ fontSize: 12, fill: '#666' }}
-                      />
-                      <YAxis 
-                        type="category" 
-                        dataKey="domain" 
-                        width={120}
-                        tick={{ fontSize: 11, fill: '#333' }}
-                      />
-                      <Tooltip 
-                        formatter={(value: number) => [`${(value * 100).toFixed(1)}% risk`, 'Risk Level']}
-                        labelFormatter={(label) => `Domain: ${label}`}
-                      />
-                      <Bar 
-                        dataKey="risk" 
-                        fill="#8884d8"
-                        radius={[0, 4, 4, 0]}
-                      >
-                        {finalRiskHeatmapData.map((entry, index) => (
-                          <Cell 
-                            key={`cell-${index}`} 
-                            fill={
-                              entry.risk > 0.7 ? '#dc3545' : // High risk - red
-                              entry.risk > 0.4 ? '#ffc107' : // Medium risk - yellow
-                              '#28a745' // Low risk - green
-                            }
-                          />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              ) : (
-                <div style={{ textAlign: 'center', padding: 40, color: '#666' }}>
-                  No domain data available
-                </div>
-              )}
+              <div style={{ height: 250 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={finalRiskHeatmapData} layout="horizontal">
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                    <XAxis 
+                      type="number" 
+                      domain={[0, 1]}
+                      tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
+                      tick={{ fontSize: 12, fill: '#666' }}
+                    />
+                    <YAxis 
+                      type="category" 
+                      dataKey="domain" 
+                      width={120}
+                      tick={{ fontSize: 11, fill: '#333' }}
+                    />
+                    <Tooltip 
+                      formatter={(value: number) => [`${(value * 100).toFixed(1)}% risk`, 'Risk Level']}
+                      labelFormatter={(label) => `Domain: ${label}`}
+                    />
+                    <Bar 
+                      dataKey="risk" 
+                      fill="#8884d8"
+                      radius={[0, 4, 4, 0]}
+                    >
+                      {finalRiskHeatmapData.map((entry, index) => (
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={
+                            entry.risk > 0.7 ? '#dc3545' : // High risk - red
+                            entry.risk > 0.4 ? '#ffc107' : // Medium risk - yellow
+                            '#28a745' // Low risk - green
+                          }
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
 
             {/* Domain Coverage Chart */}
@@ -554,39 +568,33 @@ IMPORTANT: This is a screening report only and should not be used for diagnosis.
               gridColumn: 'span 2'
             }}>
               <h3 style={{ color: '#333', marginTop: 0, marginBottom: 16 }}>Domain Coverage Distribution</h3>
-              {finalDomainCoverageData.length > 0 ? (
-                <div style={{ height: 250 }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={finalDomainCoverageData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ domain, percentage }) => `${domain}: ${percentage.toFixed(1)}%`}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="count"
-                      >
-                        {finalDomainCoverageData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip 
-                        formatter={(value: number, name: string) => [
-                          `${value} questions`, 
-                          name
-                        ]}
-                      />
-                      <Legend />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              ) : (
-                <div style={{ textAlign: 'center', padding: 40, color: '#666' }}>
-                  No domain coverage data available
-                </div>
-              )}
+              <div style={{ height: 250 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={finalDomainCoverageData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ domain, percentage }) => `${domain}: ${percentage.toFixed(1)}%`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="count"
+                    >
+                      {finalDomainCoverageData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      formatter={(value: number, name: string) => [
+                        `${value} questions`, 
+                        name
+                      ]}
+                    />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
             </div>
 
           </div>
