@@ -405,16 +405,16 @@ IMPORTANT: This is a screening report only and should not be used for diagnosis.
         }}>
           <h3 style={{ color: '#333', marginTop: 0 }}>Session Metadata</h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
-            <div>
+            <div style={{ color: '#333' }}>
               <strong>Total Questions:</strong> {report.sessionMetadata.totalQuestions}
             </div>
-            <div>
+            <div style={{ color: '#333' }}>
               <strong>Session Duration:</strong> {report.sessionMetadata.sessionDuration} minutes
             </div>
-            <div>
+            <div style={{ color: '#333' }}>
               <strong>Emotion Variability:</strong> {report.sessionMetadata.emotionVariability.toFixed(2)}
             </div>
-            <div>
+            <div style={{ color: '#333' }}>
               <strong>Primary Emotions:</strong> {report.sessionMetadata.primaryEmotions.join(', ')}
             </div>
           </div>
