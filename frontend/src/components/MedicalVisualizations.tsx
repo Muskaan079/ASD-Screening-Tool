@@ -1,9 +1,5 @@
 import React from 'react';
-import { 
-  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, 
-  Area, ComposedChart, Line, BarChart, Bar, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, PieChart, Pie
-} from 'recharts';
+import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 interface MedicalVisualizationsProps {
   clinicalRadarData: any[];
