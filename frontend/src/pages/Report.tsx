@@ -351,7 +351,6 @@ const ReportPage: React.FC<ReportPageProps> = ({
     JSON.parse(sessionStorage.getItem('screeningHistory') || '[]'),
     propEmotionLog.length > 0 ? propEmotionLog : 
     JSON.parse(sessionStorage.getItem('screeningEmotionLog') || '[]'));
-  const decisionTree = report ? prepareClinicalDecisionTree(report) : null;
 
   // Add fallback data if no real data is available (for demonstration)
   const finalEmotionTrendData = emotionTrendData.length > 0 ? emotionTrendData : [
@@ -374,32 +373,6 @@ const ReportPage: React.FC<ReportPageProps> = ({
     { domain: 'Sensory Processing', count: 2, percentage: 20 },
     { domain: 'Restricted Behaviors', count: 4, percentage: 40 },
     { domain: 'Cognitive Patterns', count: 1, percentage: 10 }
-  ];
-
-  const finalClinicalRadarData = clinicalRadarData.length > 0 ? clinicalRadarData : [
-    { subject: 'Social Communication', A: 65, fullMark: 100 },
-    { subject: 'Sensory Processing', A: 45, fullMark: 100 },
-    { subject: 'Restricted Behaviors', A: 75, fullMark: 100 },
-    { subject: 'Cognitive Patterns', A: 55, fullMark: 100 },
-    { subject: 'Emotional Regulation', A: 60, fullMark: 100 },
-    { subject: 'Attention & Focus', A: 70, fullMark: 100 }
-  ];
-
-  const finalProgressData = progressData.length > 0 ? progressData : [
-    { session: 'Q1', score: 45, baseline: 50, target: 70 },
-    { session: 'Q2', score: 52, baseline: 50, target: 70 },
-    { session: 'Q3', score: 58, baseline: 50, target: 70 },
-    { session: 'Q4', score: 63, baseline: 50, target: 70 },
-    { session: 'Q5', score: 67, baseline: 50, target: 70 }
-  ];
-
-  const finalClinicalRiskData = clinicalRiskData.length > 0 ? clinicalRiskData : [
-    { domain: 'Social Communication', severity: 'Medium', riskScore: 65, color: '#ffc107' },
-    { domain: 'Sensory Processing', severity: 'Low', riskScore: 30, color: '#28a745' },
-    { domain: 'Restricted Behaviors', severity: 'High', riskScore: 80, color: '#fd7e14' },
-    { domain: 'Cognitive Patterns', severity: 'Medium', riskScore: 55, color: '#ffc107' },
-    { domain: 'Emotional Regulation', severity: 'Low', riskScore: 40, color: '#28a745' },
-    { domain: 'Attention & Focus', severity: 'Medium', riskScore: 60, color: '#ffc107' }
   ];
 
   // Color palette for charts
