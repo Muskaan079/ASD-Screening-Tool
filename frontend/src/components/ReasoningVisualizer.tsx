@@ -25,9 +25,9 @@ const ReasoningVisualizer: React.FC<ReasoningVisualizerProps> = ({
   const sortedReasoning = [...reasoning].sort((a, b) => b.impact - a.impact);
 
   const getColorByImpact = (impact: number): string => {
-    if (impact >= 0.7) return '#4caf50'; // High impact - green
-    if (impact >= 0.4) return '#ff9800'; // Medium impact - orange
-    return '#f44336'; // Low impact - red
+    if (impact > 0.6) return '#dc3545'; // High impact - red
+    if (impact > 0.3) return '#ffc107'; // Medium impact - yellow
+    return '#28a745'; // Low impact - green
   };
 
   // Prepare data for Recharts
@@ -41,19 +41,55 @@ const ReasoningVisualizer: React.FC<ReasoningVisualizerProps> = ({
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
+      const impact = payload[0].value;
+      const impactPercent = formatImpact(impact);
+      const color = getColorByImpact(impact);
+      
       return (
         <div style={{
-          background: '#fff',
-          border: '1px solid #ccc',
+          background: '#ffffff',
+          border: '1px solid #ddd',
           borderRadius: 8,
           padding: 12,
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+          boxShadow: '0 4px 8px rgba(0,0,0,0.15)',
+          color: '#333'
         }}>
-          <p style={{ margin: 0, fontWeight: 'bold', color: '#333' }}>
+          <p style={{ 
+            margin: 0, 
+            fontWeight: 'bold', 
+            color: '#333',
+            fontSize: 14,
+            borderBottom: '1px solid #eee',
+            paddingBottom: 4,
+            marginBottom: 6
+          }}>
             {label}
           </p>
-          <p style={{ margin: '4px 0 0 0', color: '#666' }}>
-            Impact: <strong>{formatImpact(payload[0].value)}</strong>
+          <p style={{ 
+            margin: 0, 
+            color: '#666',
+            fontSize: 13,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6
+          }}>
+            <span style={{ 
+              width: 8, 
+              height: 8, 
+              background: color, 
+              borderRadius: '50%',
+              display: 'inline-block'
+            }}></span>
+            <strong>{impactPercent} influence</strong>
+          </p>
+          <p style={{ 
+            margin: '4px 0 0 0', 
+            color: '#888',
+            fontSize: 12,
+            fontStyle: 'italic'
+          }}>
+            {impact > 0.6 ? 'High impact factor' : 
+             impact > 0.3 ? 'Medium impact factor' : 'Low impact factor'}
           </p>
         </div>
       );
@@ -150,28 +186,28 @@ const ReasoningVisualizer: React.FC<ReasoningVisualizerProps> = ({
             <div style={{ 
               width: 12, 
               height: 12, 
-              background: '#4caf50', 
+              background: '#dc3545', 
               borderRadius: 2 
             }}></div>
-            <span>High (≥70%)</span>
+            <span>High (&gt;60%)</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
             <div style={{ 
               width: 12, 
               height: 12, 
-              background: '#ff9800', 
+              background: '#ffc107', 
               borderRadius: 2 
             }}></div>
-            <span>Medium (40-69%)</span>
+            <span>Medium (30-60%)</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
             <div style={{ 
               width: 12, 
               height: 12, 
-              background: '#f44336', 
+              background: '#28a745', 
               borderRadius: 2 
             }}></div>
-            <span>Low (&lt;40%)</span>
+            <span>Low (≤30%)</span>
           </div>
         </div>
       </div>
