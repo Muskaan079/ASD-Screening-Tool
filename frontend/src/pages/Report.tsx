@@ -59,8 +59,12 @@ const ReportPage: React.FC<ReportPageProps> = ({
       setIsGenerating(true);
       setError(null);
       
+      console.log('Starting report generation...', { history, emotionLog, sessionDuration });
+      
       // Import the report generator dynamically to avoid circular dependencies
       const { generateClinicalReport } = await import('../services/reportGenerator');
+      
+      console.log('Report generator imported, calling generateClinicalReport...');
       
       const clinicalReport = await generateClinicalReport({
         history,
@@ -68,10 +72,11 @@ const ReportPage: React.FC<ReportPageProps> = ({
         sessionDuration,
       });
       
+      console.log('Report generated successfully:', clinicalReport);
       setReport(clinicalReport);
     } catch (err) {
+      console.error('Error in generateReport:', err);
       setError('Failed to generate clinical report. Please try again.');
-      console.error('Error generating report:', err);
     } finally {
       setIsGenerating(false);
     }

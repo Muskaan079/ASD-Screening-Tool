@@ -255,11 +255,18 @@ const ChatInterface: React.FC = () => {
     // Convert messages to conversation history for report
     const conversationHistory = getConversationHistory();
     
+    console.log('Storing data for report:', {
+      conversationHistory,
+      emotionLog,
+      sessionDuration
+    });
+    
     // Store data in sessionStorage for the report page
     sessionStorage.setItem('screeningHistory', JSON.stringify(conversationHistory));
     sessionStorage.setItem('screeningEmotionLog', JSON.stringify(emotionLog));
     sessionStorage.setItem('screeningDuration', sessionDuration.toString());
     
+    console.log('Data stored, navigating to report...');
     navigate('/report');
   };
 
