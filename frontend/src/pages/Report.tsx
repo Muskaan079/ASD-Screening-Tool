@@ -563,33 +563,33 @@ IMPORTANT: This is a screening report only and should not be used for diagnosis.
     <div style={{ 
       minHeight: '100vh', 
       background: '#f5f5f5',
-      padding: '20px'
+      padding: '40px'
     }}>
       <div style={{ 
-        maxWidth: 1200, 
+        maxWidth: 1400, 
         margin: '0 auto', 
         background: 'white',
-        borderRadius: 12,
-        padding: 40,
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+        borderRadius: 16,
+        padding: 60,
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
       }}>
         {/* Header */}
         <div style={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'center', 
-          marginBottom: 30,
+          marginBottom: 40,
           borderBottom: '3px solid #2E86AB',
-          paddingBottom: 20,
+          paddingBottom: 30,
           background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
-          padding: '20px',
-          borderRadius: '8px 8px 0 0'
+          padding: '30px',
+          borderRadius: '12px 12px 0 0'
         }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
               <div style={{ 
-                width: 40, 
-                height: 40, 
+                width: 50, 
+                height: 50, 
                 background: '#2E86AB', 
                 borderRadius: '50%', 
                 display: 'flex', 
@@ -597,37 +597,37 @@ IMPORTANT: This is a screening report only and should not be used for diagnosis.
                 justifyContent: 'center',
                 color: 'white',
                 fontWeight: 'bold',
-                fontSize: 18
+                fontSize: 22
               }}>
                 🏥
               </div>
               <div>
-                <h1 style={{ margin: 0, color: '#2E86AB', fontSize: '2.2rem', fontWeight: 'bold' }}>
+                <h1 style={{ margin: 0, color: '#2E86AB', fontSize: '2.5rem', fontWeight: 'bold' }}>
                   CLINICAL SCREENING REPORT
                 </h1>
-                <p style={{ margin: '4px 0 0 0', color: '#666', fontSize: 14, fontWeight: '500' }}>
+                <p style={{ margin: '6px 0 0 0', color: '#666', fontSize: 16, fontWeight: '500' }}>
                   Autism Spectrum Disorder (ASD) Assessment
                 </p>
               </div>
             </div>
-            <div style={{ display: 'flex', gap: 20, fontSize: 12, color: '#666' }}>
+            <div style={{ display: 'flex', gap: 30, fontSize: 14, color: '#666' }}>
               <span><strong>Report ID:</strong> {Math.random().toString(36).substr(2, 9).toUpperCase()}</span>
               <span><strong>Generated:</strong> {new Date().toLocaleDateString()} at {new Date().toLocaleTimeString()}</span>
               <span><strong>Version:</strong> 2.1</span>
             </div>
           </div>
-          <div style={{ display: 'flex', gap: 12 }}>
+          <div style={{ display: 'flex', gap: 16 }}>
             <button
               onClick={handleBackToChat}
               style={{
-                padding: '10px 20px',
+                padding: '12px 24px',
                 background: '#f0f0f0',
                 border: 'none',
-                borderRadius: 6,
+                borderRadius: 8,
                 color: '#333',
                 cursor: 'pointer',
                 fontWeight: 'bold',
-                fontSize: 14
+                fontSize: 16
               }}
             >
               ← Back to Chat
@@ -635,15 +635,15 @@ IMPORTANT: This is a screening report only and should not be used for diagnosis.
             <button
               onClick={downloadPDF}
               style={{
-                padding: '10px 20px',
+                padding: '12px 24px',
                 background: '#2E86AB',
                 border: 'none',
-                borderRadius: 6,
+                borderRadius: 8,
                 color: 'white',
                 cursor: 'pointer',
                 fontWeight: 'bold',
-                fontSize: 14,
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                fontSize: 16,
+                boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
               }}
             >
               📥 Download Clinical Report
@@ -652,69 +652,70 @@ IMPORTANT: This is a screening report only and should not be used for diagnosis.
         </div>
 
         {/* Summary Section */}
-        <section style={{ marginBottom: 30 }}>
-          <h2 style={{ color: '#333', borderBottom: '1px solid #eee', paddingBottom: 10 }}>Executive Summary</h2>
-          <p style={{ fontSize: 16, lineHeight: 1.6, color: '#444' }}>{report.summary}</p>
+        <section style={{ marginBottom: 40 }}>
+          <h2 style={{ color: '#333', borderBottom: '2px solid #eee', paddingBottom: 15, fontSize: '1.8rem' }}>Executive Summary</h2>
+          <p style={{ fontSize: 18, lineHeight: 1.7, color: '#444', marginTop: 20 }}>{report.summary}</p>
         </section>
 
         {/* Clinical Scoring Section */}
-        <section style={{ marginBottom: 30 }}>
-          <h2 style={{ color: '#333', borderBottom: '1px solid #eee', paddingBottom: 10 }}>Clinical Assessment Scores</h2>
+        <section style={{ marginBottom: 40 }}>
+          <h2 style={{ color: '#333', borderBottom: '2px solid #eee', paddingBottom: 15, fontSize: '1.8rem' }}>Clinical Assessment Scores</h2>
           
           <div style={{ 
             background: '#f8f9fa', 
-            padding: 20, 
-            borderRadius: 8,
+            padding: 30, 
+            borderRadius: 12,
             border: '1px solid #e9ecef',
-            marginBottom: 20
+            marginBottom: 30
           }}>
-            <h3 style={{ color: '#333', marginTop: 0, marginBottom: 16 }}>📋 DSM-5 Criteria Assessment</h3>
+            <h3 style={{ color: '#333', marginTop: 0, marginBottom: 20, fontSize: '1.4rem' }}>📋 DSM-5 Criteria Assessment</h3>
             
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: 30 }}>
               
               {/* Social Communication Domain */}
               <div style={{ 
                 background: 'white', 
-                padding: 16, 
-                borderRadius: 8, 
-                border: '1px solid #e9ecef'
+                padding: 24, 
+                borderRadius: 12, 
+                border: '1px solid #e9ecef',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
               }}>
-                <h4 style={{ color: '#333', margin: '0 0 12px 0' }}>Social Communication</h4>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                  <span style={{ fontSize: 14, color: '#666' }}>Social-Emotional Reciprocity:</span>
+                <h4 style={{ color: '#333', margin: '0 0 16px 0', fontSize: '1.2rem' }}>Social Communication</h4>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <span style={{ fontSize: 16, color: '#666' }}>Social-Emotional Reciprocity:</span>
                   <div style={{ 
-                    padding: '4px 12px', 
-                    borderRadius: 12, 
+                    padding: '6px 16px', 
+                    borderRadius: 16, 
                     backgroundColor: '#ffc107',
                     color: '#333',
                     fontWeight: 'bold',
-                    fontSize: 12
+                    fontSize: 14
                   }}>
                     Moderate (65%)
                   </div>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                  <span style={{ fontSize: 14, color: '#666' }}>Nonverbal Communication:</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <span style={{ fontSize: 16, color: '#666' }}>Nonverbal Communication:</span>
                   <div style={{ 
-                    padding: '4px 12px', 
-                    borderRadius: 12, 
+                    padding: '6px 16px', 
+                    borderRadius: 16, 
                     backgroundColor: '#28a745',
                     color: 'white',
                     fontWeight: 'bold',
-                    fontSize: 12
+                    fontSize: 14
                   }}>
                     Mild (45%)
                   </div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: 14, color: '#666' }}>Relationships:</span>
+                  <span style={{ fontSize: 16, color: '#666' }}>Relationships:</span>
                   <div style={{ 
-                    padding: '4px 12px', 
-                    borderRadius: 12, 
+                    padding: '6px 16px', 
+                    borderRadius: 16, 
                     backgroundColor: '#fd7e14',
                     color: 'white',
                     fontWeight: 'bold',
-                    fontSize: 12
+                    fontSize: 14
                   }}>
                     Significant (75%)
                   </div>
@@ -724,46 +725,47 @@ IMPORTANT: This is a screening report only and should not be used for diagnosis.
               {/* Restricted & Repetitive Behaviors */}
               <div style={{ 
                 background: 'white', 
-                padding: 16, 
-                borderRadius: 8, 
-                border: '1px solid #e9ecef'
+                padding: 24, 
+                borderRadius: 12, 
+                border: '1px solid #e9ecef',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
               }}>
-                <h4 style={{ color: '#333', margin: '0 0 12px 0' }}>Restricted & Repetitive Behaviors</h4>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                  <span style={{ fontSize: 14, color: '#666' }}>Stereotyped/Repetitive:</span>
+                <h4 style={{ color: '#333', margin: '0 0 16px 0', fontSize: '1.2rem' }}>Restricted & Repetitive Behaviors</h4>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <span style={{ fontSize: 16, color: '#666' }}>Stereotyped/Repetitive:</span>
                   <div style={{ 
-                    padding: '4px 12px', 
-                    borderRadius: 12, 
+                    padding: '6px 16px', 
+                    borderRadius: 16, 
                     backgroundColor: '#28a745',
                     color: 'white',
                     fontWeight: 'bold',
-                    fontSize: 12
+                    fontSize: 14
                   }}>
                     Mild (40%)
                   </div>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                  <span style={{ fontSize: 14, color: '#666' }}>Insistence on Sameness:</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <span style={{ fontSize: 16, color: '#666' }}>Insistence on Sameness:</span>
                   <div style={{ 
-                    padding: '4px 12px', 
-                    borderRadius: 12, 
+                    padding: '6px 16px', 
+                    borderRadius: 16, 
                     backgroundColor: '#ffc107',
                     color: '#333',
                     fontWeight: 'bold',
-                    fontSize: 12
+                    fontSize: 14
                   }}>
                     Moderate (55%)
                   </div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: 14, color: '#666' }}>Restricted Interests:</span>
+                  <span style={{ fontSize: 16, color: '#666' }}>Restricted Interests:</span>
                   <div style={{ 
-                    padding: '4px 12px', 
-                    borderRadius: 12, 
+                    padding: '6px 16px', 
+                    borderRadius: 16, 
                     backgroundColor: '#fd7e14',
                     color: 'white',
                     fontWeight: 'bold',
-                    fontSize: 12
+                    fontSize: 14
                   }}>
                     Significant (70%)
                   </div>
@@ -773,46 +775,47 @@ IMPORTANT: This is a screening report only and should not be used for diagnosis.
               {/* Sensory Processing */}
               <div style={{ 
                 background: 'white', 
-                padding: 16, 
-                borderRadius: 8, 
-                border: '1px solid #e9ecef'
+                padding: 24, 
+                borderRadius: 12, 
+                border: '1px solid #e9ecef',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
               }}>
-                <h4 style={{ color: '#333', margin: '0 0 12px 0' }}>Sensory Processing</h4>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                  <span style={{ fontSize: 14, color: '#666' }}>Hyperreactivity:</span>
+                <h4 style={{ color: '#333', margin: '0 0 16px 0', fontSize: '1.2rem' }}>Sensory Processing</h4>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <span style={{ fontSize: 16, color: '#666' }}>Hyperreactivity:</span>
                   <div style={{ 
-                    padding: '4px 12px', 
-                    borderRadius: 12, 
+                    padding: '6px 16px', 
+                    borderRadius: 16, 
                     backgroundColor: '#28a745',
                     color: 'white',
                     fontWeight: 'bold',
-                    fontSize: 12
+                    fontSize: 14
                   }}>
                     Mild (30%)
                   </div>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                  <span style={{ fontSize: 14, color: '#666' }}>Hyporeactivity:</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <span style={{ fontSize: 16, color: '#666' }}>Hyporeactivity:</span>
                   <div style={{ 
-                    padding: '4px 12px', 
-                    borderRadius: 12, 
+                    padding: '6px 16px', 
+                    borderRadius: 16, 
                     backgroundColor: '#28a745',
                     color: 'white',
                     fontWeight: 'bold',
-                    fontSize: 12
+                    fontSize: 14
                   }}>
                     Mild (35%)
                   </div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: 14, color: '#666' }}>Sensory Seeking:</span>
+                  <span style={{ fontSize: 16, color: '#666' }}>Sensory Seeking:</span>
                   <div style={{ 
-                    padding: '4px 12px', 
-                    borderRadius: 12, 
+                    padding: '6px 16px', 
+                    borderRadius: 16, 
                     backgroundColor: '#ffc107',
                     color: '#333',
                     fontWeight: 'bold',
-                    fontSize: 12
+                    fontSize: 14
                   }}>
                     Moderate (50%)
                   </div>
@@ -823,31 +826,174 @@ IMPORTANT: This is a screening report only and should not be used for diagnosis.
 
             {/* Overall Severity Assessment */}
             <div style={{ 
-              marginTop: 20, 
-              padding: 16, 
+              marginTop: 30, 
+              padding: 24, 
               background: 'white', 
-              borderRadius: 8, 
+              borderRadius: 12, 
               border: '2px solid #e9ecef',
-              textAlign: 'center'
+              textAlign: 'center',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
             }}>
-              <h4 style={{ color: '#333', margin: '0 0 12px 0' }}>Overall Clinical Severity</h4>
+              <h4 style={{ color: '#333', margin: '0 0 16px 0', fontSize: '1.3rem' }}>Overall Clinical Severity</h4>
               <div style={{ 
-                padding: '12px 24px', 
-                borderRadius: 25, 
+                padding: '16px 32px', 
+                borderRadius: 30, 
                 display: 'inline-block',
                 backgroundColor: '#ffc107',
                 color: '#333',
                 fontWeight: 'bold',
-                fontSize: 18,
-                border: '2px solid #e6c200'
+                fontSize: 20,
+                border: '2px solid #e6c200',
+                boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
               }}>
                 MODERATE SEVERITY LEVEL
               </div>
-              <p style={{ margin: '12px 0 0 0', fontSize: 14, color: '#666' }}>
+              <p style={{ margin: '16px 0 0 0', fontSize: 16, color: '#666', lineHeight: 1.6 }}>
                 Based on DSM-5 criteria assessment, this screening indicates moderate clinical concerns requiring follow-up evaluation.
               </p>
             </div>
 
+          </div>
+        </section>
+
+        {/* Recommendations Section */}
+        <section style={{ marginBottom: 40 }}>
+          <h2 style={{ color: '#333', borderBottom: '2px solid #eee', paddingBottom: 15, fontSize: '1.8rem' }}>Clinical Recommendations</h2>
+          
+          <div style={{ 
+            background: '#f8f9fa', 
+            padding: 30, 
+            borderRadius: 12,
+            border: '1px solid #e9ecef',
+            marginBottom: 20
+          }}>
+            <h3 style={{ color: '#333', marginTop: 0, marginBottom: 20, fontSize: '1.4rem' }}>🎯 Immediate Action Items</h3>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: 25 }}>
+              
+              <div style={{ 
+                background: 'white', 
+                padding: 24, 
+                borderRadius: 12, 
+                border: '1px solid #e9ecef',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+              }}>
+                <h4 style={{ color: '#333', margin: '0 0 16px 0', fontSize: '1.2rem' }}>🔍 Comprehensive Evaluation</h4>
+                <ul style={{ margin: 0, paddingLeft: 20, fontSize: 16, lineHeight: 1.7, color: '#444' }}>
+                  <li>Schedule diagnostic evaluation with developmental pediatrician</li>
+                  <li>Complete standardized ASD assessment tools (ADOS-2, ADI-R)</li>
+                  <li>Include speech-language and occupational therapy evaluations</li>
+                  <li>Consider genetic testing if indicated</li>
+                </ul>
+              </div>
+
+              <div style={{ 
+                background: 'white', 
+                padding: 24, 
+                borderRadius: 12, 
+                border: '1px solid #e9ecef',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+              }}>
+                <h4 style={{ color: '#333', margin: '0 0 16px 0', fontSize: '1.2rem' }}>🏥 Early Intervention</h4>
+                <ul style={{ margin: 0, paddingLeft: 20, fontSize: 16, lineHeight: 1.7, color: '#444' }}>
+                  <li>Enroll in early intervention program (if under 3 years)</li>
+                  <li>Begin Applied Behavior Analysis (ABA) therapy</li>
+                  <li>Start speech and language therapy</li>
+                  <li>Consider occupational therapy for sensory needs</li>
+                </ul>
+              </div>
+
+              <div style={{ 
+                background: 'white', 
+                padding: 24, 
+                borderRadius: 12, 
+                border: '1px solid #e9ecef',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+              }}>
+                <h4 style={{ color: '#333', margin: '0 0 16px 0', fontSize: '1.2rem' }}>📚 Educational Planning</h4>
+                <ul style={{ margin: 0, paddingLeft: 20, fontSize: 16, lineHeight: 1.7, color: '#444' }}>
+                  <li>Request school district evaluation for IEP</li>
+                  <li>Consider specialized educational placement</li>
+                  <li>Implement classroom accommodations</li>
+                  <li>Develop communication support plan</li>
+                </ul>
+              </div>
+
+              <div style={{ 
+                background: 'white', 
+                padding: 24, 
+                borderRadius: 12, 
+                border: '1px solid #e9ecef',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+              }}>
+                <h4 style={{ color: '#333', margin: '0 0 16px 0', fontSize: '1.2rem' }}>👨‍👩‍👧‍👦 Family Support</h4>
+                <ul style={{ margin: 0, paddingLeft: 20, fontSize: 16, lineHeight: 1.7, color: '#444' }}>
+                  <li>Connect with local autism support groups</li>
+                  <li>Access parent training programs</li>
+                  <li>Consider family counseling services</li>
+                  <li>Explore respite care options</li>
+                </ul>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* Medical Disclaimer */}
+        <section style={{ marginBottom: 40 }}>
+          <h2 style={{ color: '#333', borderBottom: '2px solid #eee', paddingBottom: 15, fontSize: '1.8rem' }}>Medical Disclaimers & Legal Information</h2>
+          
+          <div style={{ 
+            background: '#fff3cd', 
+            padding: 30, 
+            borderRadius: 12,
+            border: '2px solid #ffeaa7',
+            marginBottom: 20
+          }}>
+            <h3 style={{ color: '#856404', marginTop: 0, marginBottom: 20, fontSize: '1.4rem' }}>⚠️ Important Medical Disclaimer</h3>
+            
+            <div style={{ fontSize: 16, lineHeight: 1.8, color: '#856404' }}>
+              <p style={{ marginBottom: 16 }}>
+                <strong>This screening tool is for informational purposes only and does not constitute a medical diagnosis.</strong> 
+                The results presented in this report are based on behavioral observations and standardized screening protocols, 
+                but should not replace professional medical evaluation.
+              </p>
+              
+              <p style={{ marginBottom: 16 }}>
+                <strong>Clinical Limitations:</strong> This assessment tool has not been validated for diagnostic purposes 
+                and may not capture all aspects of autism spectrum disorder. False positives and false negatives are possible. 
+                Only qualified healthcare professionals can provide definitive diagnoses.
+              </p>
+              
+              <p style={{ marginBottom: 16 }}>
+                <strong>Professional Consultation Required:</strong> If this screening indicates potential concerns, 
+                immediate consultation with a developmental pediatrician, child psychiatrist, or clinical psychologist 
+                specializing in autism spectrum disorders is strongly recommended.
+              </p>
+              
+              <p style={{ marginBottom: 0 }}>
+                <strong>Data Privacy:</strong> This report contains sensitive medical information and should be handled 
+                according to applicable privacy regulations (HIPAA, GDPR, etc.). Ensure secure storage and transmission 
+                of this document.
+              </p>
+            </div>
+          </div>
+
+          <div style={{ 
+            background: '#e2e3e5', 
+            padding: 24, 
+            borderRadius: 12,
+            border: '1px solid #d6d8db',
+            fontSize: 14,
+            color: '#495057',
+            lineHeight: 1.6
+          }}>
+            <p style={{ margin: 0 }}>
+              <strong>Report Generated:</strong> {new Date().toLocaleDateString()} at {new Date().toLocaleTimeString()} | 
+              <strong> Tool Version:</strong> 2.1 | 
+              <strong> Clinical Protocol:</strong> DSM-5 Criteria | 
+              <strong> Data Retention:</strong> 30 days
+            </p>
           </div>
         </section>
 

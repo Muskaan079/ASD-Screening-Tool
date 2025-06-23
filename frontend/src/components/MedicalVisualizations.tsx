@@ -2,7 +2,7 @@ import React from 'react';
 import { 
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, 
   Area, ComposedChart, Line, BarChart, Bar, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, PieChart, Pie
 } from 'recharts';
 
 interface MedicalVisualizationsProps {
@@ -21,277 +21,258 @@ const MedicalVisualizations: React.FC<MedicalVisualizationsProps> = ({
   medicalColors
 }) => {
   return (
-    <div>
-      {/* Clinical Radar Chart - Domain Assessment */}
+    <div style={{ marginBottom: 40 }}>
+      <h2 style={{ color: '#333', borderBottom: '2px solid #eee', paddingBottom: 15, fontSize: '1.8rem' }}>Clinical Visualizations</h2>
+      
       <div style={{ 
         background: '#f8f9fa', 
-        padding: 20, 
-        borderRadius: 8,
+        padding: 40, 
+        borderRadius: 16,
         border: '1px solid #e9ecef',
-        marginBottom: 20
+        marginBottom: 30
       }}>
-        <h3 style={{ color: '#333', marginTop: 0, marginBottom: 16 }}>📊 Clinical Domain Assessment (Radar Chart)</h3>
-        <p style={{ fontSize: 14, color: '#666', marginBottom: 16 }}>
-          Multi-domain clinical assessment showing performance across key developmental areas (0-100 scale)
-        </p>
-        <div style={{ height: 400 }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={clinicalRadarData}>
-              <PolarGrid stroke="#e0e0e0" />
-              <PolarAngleAxis dataKey="subject" tick={{ fontSize: 12, fill: '#333' }} />
-              <PolarRadiusAxis 
-                angle={90} 
-                domain={[0, 100]} 
-                tick={{ fontSize: 10, fill: '#666' }}
-                tickFormatter={(value) => `${value}%`}
-              />
-              <Radar
-                name="Clinical Score"
-                dataKey="A"
-                stroke={medicalColors.primary}
-                fill={medicalColors.primary}
-                fillOpacity={0.3}
-                strokeWidth={2}
-              />
-              <Tooltip 
-                formatter={(value: number) => [`${value}%`, 'Clinical Score']}
-                labelFormatter={(label) => `Domain: ${label}`}
-              />
-            </RadarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Progress Chart - Session Progress */}
-      <div style={{ 
-        background: '#f8f9fa', 
-        padding: 20, 
-        borderRadius: 8,
-        border: '1px solid #e9ecef',
-        marginBottom: 20
-      }}>
-        <h3 style={{ color: '#333', marginTop: 0, marginBottom: 16 }}>📈 Session Progress Analysis</h3>
-        <p style={{ fontSize: 14, color: '#666', marginBottom: 16 }}>
-          Performance progression throughout the screening session with baseline and target indicators
-        </p>
-        <div style={{ height: 300 }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={progressData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-              <XAxis 
-                dataKey="session" 
-                tick={{ fontSize: 12, fill: '#333' }}
-                label={{ value: 'Session Progress', position: 'insideBottom', offset: -5 }}
-              />
-              <YAxis 
-                domain={[0, 100]}
-                tick={{ fontSize: 12, fill: '#666' }}
-                label={{ value: 'Clinical Score (%)', angle: -90, position: 'insideLeft' }}
-              />
-              <Tooltip 
-                formatter={(value: number, name: string) => [
-                  `${value}%`, 
-                  name === 'score' ? 'Current Score' : 
-                  name === 'baseline' ? 'Baseline' : 'Target'
-                ]}
-              />
-              <Area 
-                type="monotone" 
-                dataKey="target" 
-                fill={medicalColors.success} 
-                fillOpacity={0.1}
-                stroke={medicalColors.success}
-                strokeWidth={1}
-                strokeDasharray="5 5"
-              />
-              <Area 
-                type="monotone" 
-                dataKey="baseline" 
-                fill={medicalColors.neutral} 
-                fillOpacity={0.1}
-                stroke={medicalColors.neutral}
-                strokeWidth={1}
-                strokeDasharray="3 3"
-              />
-              <Line 
-                type="monotone" 
-                dataKey="score" 
-                stroke={medicalColors.primary} 
-                strokeWidth={3}
-                dot={{ fill: medicalColors.primary, strokeWidth: 2, r: 5 }}
-                activeDot={{ r: 8, stroke: medicalColors.primary, strokeWidth: 2 }}
-              />
-            </ComposedChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Clinical Risk Heatmap */}
-      <div style={{ 
-        background: '#f8f9fa', 
-        padding: 20, 
-        borderRadius: 8,
-        border: '1px solid #e9ecef',
-        marginBottom: 20
-      }}>
-        <h3 style={{ color: '#333', marginTop: 0, marginBottom: 16 }}>⚠️ Clinical Risk Assessment Heatmap</h3>
-        <p style={{ fontSize: 14, color: '#666', marginBottom: 16 }}>
-          Color-coded risk levels across clinical domains with severity indicators
-        </p>
-        <div style={{ height: 350 }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={clinicalRiskData} layout="horizontal">
-              <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-              <XAxis 
-                type="number" 
-                domain={[0, 100]}
-                tickFormatter={(value) => `${value}%`}
-                tick={{ fontSize: 12, fill: '#666' }}
-                label={{ value: 'Risk Score (%)', position: 'insideBottom', offset: -5 }}
-              />
-              <YAxis 
-                type="category" 
-                dataKey="domain" 
-                width={140}
-                tick={{ fontSize: 11, fill: '#333' }}
-              />
-              <Tooltip 
-                formatter={(value: number, _name: string) => [`${value}% risk`, 'Risk Level']}
-                labelFormatter={(label) => `Domain: ${label}`}
-              />
-              <Bar 
-                dataKey="riskScore" 
-                fill="#8884d8"
-                radius={[0, 4, 4, 0]}
-              >
-                {clinicalRiskData.map((entry, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={entry.color}
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-        {/* Risk Legend */}
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          gap: 20, 
-          marginTop: 16,
-          flexWrap: 'wrap'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 20, height: 20, backgroundColor: '#28a745', borderRadius: 4 }}></div>
-            <span style={{ fontSize: 14 }}>Low Risk (0-40%)</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 20, height: 20, backgroundColor: '#ffc107', borderRadius: 4 }}></div>
-            <span style={{ fontSize: 14 }}>Medium Risk (40-60%)</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 20, height: 20, backgroundColor: '#fd7e14', borderRadius: 4 }}></div>
-            <span style={{ fontSize: 14 }}>High Risk (60-80%)</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 20, height: 20, backgroundColor: '#dc3545', borderRadius: 4 }}></div>
-            <span style={{ fontSize: 14 }}>Critical Risk (80-100%)</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Clinical Decision Tree */}
-      {decisionTree && (
-        <div style={{ 
-          background: '#f8f9fa', 
-          padding: 20, 
-          borderRadius: 8,
-          border: '1px solid #e9ecef',
-          marginBottom: 20
-        }}>
-          <h3 style={{ color: '#333', marginTop: 0, marginBottom: 16 }}>🔄 Clinical Decision Tree</h3>
-          <p style={{ fontSize: 14, color: '#666', marginBottom: 16 }}>
-            Evidence-based clinical pathway for next steps based on assessment results
-          </p>
-          
+        
+        {/* Radar Chart Section */}
+        <div style={{ marginBottom: 50 }}>
+          <h3 style={{ color: '#333', marginBottom: 25, fontSize: '1.5rem', textAlign: 'center' }}>
+            📊 DSM-5 Criteria Assessment Radar
+          </h3>
           <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
-            gap: 20 
+            background: 'white', 
+            padding: 30, 
+            borderRadius: 16,
+            boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+            border: '1px solid #e9ecef'
           }}>
-            {/* Assessment Level */}
-            <div style={{ 
-              background: 'white', 
-              padding: 16, 
-              borderRadius: 8, 
-              border: '2px solid #e9ecef',
-              textAlign: 'center'
-            }}>
-              <h4 style={{ margin: '0 0 8px 0', color: '#333' }}>Assessment Level</h4>
-              <div style={{ 
-                padding: '8px 16px', 
-                borderRadius: 20, 
-                display: 'inline-block',
-                backgroundColor: decisionTree.assessment === 'High' ? '#dc3545' :
-                               decisionTree.assessment === 'Medium' ? '#ffc107' : '#28a745',
-                color: 'white',
-                fontWeight: 'bold',
-                fontSize: 16
-              }}>
-                {decisionTree.assessment} Risk
-              </div>
-            </div>
-
-            {/* Urgency */}
-            <div style={{ 
-              background: 'white', 
-              padding: 16, 
-              borderRadius: 8, 
-              border: '2px solid #e9ecef',
-              textAlign: 'center'
-            }}>
-              <h4 style={{ margin: '0 0 8px 0', color: '#333' }}>Clinical Urgency</h4>
-              <div style={{ 
-                padding: '8px 16px', 
-                borderRadius: 20, 
-                display: 'inline-block',
-                backgroundColor: decisionTree.urgency === 'Immediate' ? '#dc3545' :
-                               decisionTree.urgency === 'Within 3 months' ? '#ffc107' : '#28a745',
-                color: 'white',
-                fontWeight: 'bold',
-                fontSize: 16
-              }}>
-                {decisionTree.urgency}
-              </div>
-            </div>
-          </div>
-
-          {/* Next Steps */}
-          <div style={{ marginTop: 20 }}>
-            <h4 style={{ color: '#333', marginBottom: 12 }}>Recommended Clinical Pathway:</h4>
-            <div style={{ 
-              background: 'white', 
-              padding: 16, 
-              borderRadius: 8, 
-              border: '1px solid #e9ecef'
-            }}>
-              <ol style={{ margin: 0, paddingLeft: 20 }}>
-                {decisionTree.nextSteps.map((step: string, index: number) => (
-                  <li key={index} style={{ 
-                    marginBottom: 8, 
-                    fontSize: 14, 
-                    lineHeight: 1.5, 
-                    color: '#444' 
-                  }}>
-                    {step}
-                  </li>
-                ))}
-              </ol>
+            <ResponsiveContainer width="100%" height={500}>
+              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={clinicalRadarData}>
+                <PolarGrid stroke="#e0e0e0" />
+                <PolarAngleAxis 
+                  dataKey="criterion" 
+                  tick={{ fontSize: 14, fill: '#333' }}
+                  tickLine={{ stroke: '#666' }}
+                />
+                <PolarRadiusAxis 
+                  angle={90} 
+                  domain={[0, 100]} 
+                  tick={{ fontSize: 12, fill: '#666' }}
+                  tickLine={{ stroke: '#ccc' }}
+                />
+                <Radar
+                  name="Assessment Score"
+                  dataKey="score"
+                  stroke={medicalColors.primary}
+                  fill={medicalColors.primary}
+                  fillOpacity={0.6}
+                  strokeWidth={3}
+                />
+              </RadarChart>
+            </ResponsiveContainer>
+            <div style={{ textAlign: 'center', marginTop: 20 }}>
+              <p style={{ fontSize: 16, color: '#666', lineHeight: 1.6 }}>
+                <strong>Interpretation:</strong> Higher scores indicate greater clinical concerns. 
+                Areas above 60% require immediate attention and follow-up evaluation.
+              </p>
             </div>
           </div>
         </div>
-      )}
+
+        {/* Progress Charts Section */}
+        <div style={{ marginBottom: 50 }}>
+          <h3 style={{ color: '#333', marginBottom: 25, fontSize: '1.5rem', textAlign: 'center' }}>
+            📈 Developmental Progress Assessment
+          </h3>
+          <div style={{ 
+            background: 'white', 
+            padding: 30, 
+            borderRadius: 16,
+            boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+            border: '1px solid #e9ecef'
+          }}>
+            <ResponsiveContainer width="100%" height={400}>
+              <BarChart data={progressData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                <XAxis 
+                  dataKey="name" 
+                  tick={{ fontSize: 14, fill: '#333' }}
+                  tickLine={{ stroke: '#666' }}
+                />
+                <YAxis 
+                  tick={{ fontSize: 12, fill: '#666' }}
+                  tickLine={{ stroke: '#ccc' }}
+                />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'white', 
+                    border: '1px solid #ccc',
+                    borderRadius: 8,
+                    fontSize: 14
+                  }}
+                />
+                <Legend />
+                <Bar dataKey="completed" fill={medicalColors.success} radius={[4, 4, 0, 0]} />
+                <Bar dataKey="total" fill={medicalColors.neutral} radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+            <div style={{ textAlign: 'center', marginTop: 20 }}>
+              <p style={{ fontSize: 16, color: '#666', lineHeight: 1.6 }}>
+                <strong>Progress Tracking:</strong> Blue bars show current achievement levels. 
+                Gray bars represent target goals for typical development.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Risk Assessment Heatmap */}
+        <div style={{ marginBottom: 50 }}>
+          <h3 style={{ color: '#333', marginBottom: 25, fontSize: '1.5rem', textAlign: 'center' }}>
+            🔥 Clinical Risk Assessment Matrix
+          </h3>
+          <div style={{ 
+            background: 'white', 
+            padding: 30, 
+            borderRadius: 16,
+            boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+            border: '1px solid #e9ecef'
+          }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20 }}>
+              {clinicalRiskData.map((item, index) => (
+                <div key={index} style={{ textAlign: 'center' }}>
+                  <div style={{
+                    width: 120,
+                    height: 120,
+                    borderRadius: '50%',
+                    margin: '0 auto 16px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    fontSize: 18,
+                    background: item.risk > 70 ? '#dc3545' : item.risk > 50 ? '#fd7e14' : '#28a745',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                  }}>
+                    {item.risk}%
+                  </div>
+                  <h4 style={{ margin: '0 0 8px 0', fontSize: 18, color: '#333' }}>{item.domain}</h4>
+                  <div style={{
+                    padding: '6px 16px',
+                    borderRadius: 16,
+                    display: 'inline-block',
+                    fontSize: 14,
+                    fontWeight: 'bold',
+                    background: item.risk > 70 ? '#dc3545' : item.risk > 50 ? '#fd7e14' : '#28a745',
+                    color: 'white'
+                  }}>
+                    {item.risk > 70 ? 'High' : item.risk > 50 ? 'Medium' : 'Low'} Risk
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div style={{ textAlign: 'center', marginTop: 30 }}>
+              <p style={{ fontSize: 16, color: '#666', lineHeight: 1.6 }}>
+                <strong>Risk Levels:</strong> Red (70%+) indicates high priority for intervention. 
+                Orange (50-69%) suggests moderate concern. Green (below 50%) shows typical development.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Clinical Decision Tree */}
+        <div>
+          <h3 style={{ color: '#333', marginBottom: 25, fontSize: '1.5rem', textAlign: 'center' }}>
+            🌳 Clinical Decision Pathway
+          </h3>
+          <div style={{ 
+            background: 'white', 
+            padding: 30, 
+            borderRadius: 16,
+            boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+            border: '1px solid #e9ecef'
+          }}>
+            <div style={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: 'center',
+              gap: 20
+            }}>
+              {/* Start */}
+              <div style={{
+                padding: '20px 40px',
+                background: '#2E86AB',
+                color: 'white',
+                borderRadius: 12,
+                fontWeight: 'bold',
+                fontSize: 18,
+                textAlign: 'center',
+                boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+              }}>
+                Screening Assessment Complete
+              </div>
+              
+              {/* Arrow */}
+              <div style={{ fontSize: 24, color: '#666' }}>↓</div>
+              
+              {/* Decision */}
+              <div style={{
+                padding: '20px 40px',
+                background: '#ffc107',
+                color: '#333',
+                borderRadius: 12,
+                fontWeight: 'bold',
+                fontSize: 18,
+                textAlign: 'center',
+                border: '2px solid #e6c200',
+                boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+              }}>
+                Moderate Severity Detected
+              </div>
+              
+              {/* Arrow */}
+              <div style={{ fontSize: 24, color: '#666' }}>↓</div>
+              
+              {/* Recommendations */}
+              <div style={{
+                padding: '20px 40px',
+                background: '#28a745',
+                color: 'white',
+                borderRadius: 12,
+                fontWeight: 'bold',
+                fontSize: 18,
+                textAlign: 'center',
+                boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+              }}>
+                Refer to Specialist for Comprehensive Evaluation
+              </div>
+              
+              {/* Next Steps */}
+              <div style={{ 
+                marginTop: 20, 
+                padding: 20, 
+                background: '#f8f9fa', 
+                borderRadius: 12,
+                border: '1px solid #e9ecef',
+                textAlign: 'center'
+              }}>
+                <h4 style={{ margin: '0 0 12px 0', color: '#333', fontSize: 16 }}>Recommended Next Steps:</h4>
+                <ul style={{ 
+                  margin: 0, 
+                  padding: 0, 
+                  listStyle: 'none',
+                  fontSize: 14,
+                  color: '#666',
+                  lineHeight: 1.8
+                }}>
+                  {decisionTree.nextSteps.map((step: string, index: number) => (
+                    <li key={index}>• {step}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 };
