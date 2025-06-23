@@ -180,7 +180,7 @@ const ReportPage: React.FC<ReportPageProps> = ({
   };
 
   // Prepare clinical radar chart data
-  const prepareClinicalRadarData = (history: ConversationEntry[], emotionLog: EmotionLogEntry[]) => {
+  const prepareClinicalRadarData = (history: ConversationEntry[], _emotionLog: EmotionLogEntry[]) => {
     const domains = [
       { name: 'Social Communication', key: 'social' },
       { name: 'Sensory Processing', key: 'sensory' },
