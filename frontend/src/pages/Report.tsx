@@ -22,9 +22,12 @@ const ReportPage: React.FC<ReportPageProps> = ({
   const [history, setHistory] = useState<ConversationEntry[]>(propHistory);
   const [emotionLog, setEmotionLog] = useState<EmotionLogEntry[]>(propEmotionLog);
   const [sessionDuration, setSessionDuration] = useState<number>(propSessionDuration);
+  const [dataLoaded, setDataLoaded] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log('ReportPage useEffect triggered with props:', { propHistory, propEmotionLog, propSessionDuration });
+    
     // If no props provided, try to get data from sessionStorage
     if (propHistory.length === 0 && propEmotionLog.length === 0) {
       try {
@@ -32,12 +35,30 @@ const ReportPage: React.FC<ReportPageProps> = ({
         const storedEmotionLog = sessionStorage.getItem('screeningEmotionLog');
         const storedDuration = sessionStorage.getItem('screeningDuration');
 
+        console.log('Retrieved from sessionStorage:', { storedHistory, storedEmotionLog, storedDuration });
+
         if (storedHistory && storedEmotionLog && storedDuration) {
-          setHistory(JSON.parse(storedHistory));
-          setEmotionLog(JSON.parse(storedEmotionLog));
-          setSessionDuration(parseInt(storedDuration));
+          const parsedHistory = JSON.parse(storedHistory);
+          const parsedEmotionLog = JSON.parse(storedEmotionLog);
+          const parsedDuration = parseInt(storedDuration);
+          
+          console.log('Parsed data:', { parsedHistory, parsedEmotionLog, parsedDuration });
+          
+          setHistory(parsedHistory);
+          setEmotionLog(parsedEmotionLog);
+          setSessionDuration(parsedDuration);
+          setDataLoaded(true);
+          
+          // Generate report with the parsed data
+          if (parsedHistory.length > 0 || parsedEmotionLog.length > 0) {
+            generateReportWithData(parsedHistory, parsedEmotionLog, parsedDuration);
+          } else {
+            setIsGenerating(false);
+            setError('No conversation data found. Please complete a screening session first.');
+          }
         } else {
           // No stored data, redirect to chat
+          console.log('No stored data found, redirecting to chat');
           navigate('/chat');
           return;
         }
@@ -46,20 +67,27 @@ const ReportPage: React.FC<ReportPageProps> = ({
         navigate('/chat');
         return;
       }
-    }
-
-    // If we have data (either from props or sessionStorage), generate report
-    if (history.length > 0 || emotionLog.length > 0) {
-      generateReport();
+    } else {
+      // Use props data directly
+      console.log('Using props data directly');
+      setDataLoaded(true);
+      if (propHistory.length > 0 || propEmotionLog.length > 0) {
+        generateReportWithData(propHistory, propEmotionLog, propSessionDuration);
+      } else {
+        setIsGenerating(false);
+        setError('No conversation data provided. Please complete a screening session first.');
+      }
     }
   }, [propHistory, propEmotionLog, propSessionDuration, navigate]);
 
-  const generateReport = async () => {
+  const generateReportWithData = async (historyData: ConversationEntry[], emotionData: EmotionLogEntry[], duration: number) => {
+    console.log('generateReportWithData called with:', { historyData, emotionData, duration });
+    
     try {
       setIsGenerating(true);
       setError(null);
       
-      console.log('Starting report generation...', { history, emotionLog, sessionDuration });
+      console.log('Starting report generation with data...', { historyData, emotionData, duration });
       
       // Add a timeout to prevent infinite loading
       const timeoutPromise = new Promise((_, reject) => 
@@ -67,14 +95,15 @@ const ReportPage: React.FC<ReportPageProps> = ({
       );
       
       // Import the report generator dynamically to avoid circular dependencies
+      console.log('Importing report generator...');
       const { generateClinicalReport } = await import('../services/reportGenerator');
       
       console.log('Report generator imported, calling generateClinicalReport...');
       
       const reportPromise = generateClinicalReport({
-        history,
-        emotionLog,
-        sessionDuration,
+        history: historyData,
+        emotionLog: emotionData,
+        sessionDuration: duration,
       });
       
       // Race between the report generation and timeout
@@ -83,21 +112,21 @@ const ReportPage: React.FC<ReportPageProps> = ({
       console.log('Report generated successfully:', clinicalReport);
       setReport(clinicalReport);
     } catch (err) {
-      console.error('Error in generateReport:', err);
+      console.error('Error in generateReportWithData:', err);
       
       // Generate a fallback report if the main generation fails
       try {
         console.log('Generating fallback report...');
         const fallbackReport: ClinicalReport = {
           summary: "A screening session was conducted to assess behavioral and communication patterns. The session covered multiple domains relevant to developmental assessment.",
-          domainsAddressed: history.length > 0 ? [...new Set(history.map(h => h.domain).filter((domain): domain is string => Boolean(domain)))] : ["General Assessment"],
+          domainsAddressed: historyData.length > 0 ? [...new Set(historyData.map(h => h.domain).filter((domain): domain is string => Boolean(domain)))] : ["General Assessment"],
           keyObservations: [
             "Participant engaged in the screening process",
-            `Responded to ${history.length} questions`,
+            `Responded to ${historyData.length} questions`,
             "Emotional state was monitored throughout the session"
           ],
           emotionalStateTrends: [
-            `Primary emotions observed: ${emotionLog.length > 0 ? emotionLog.map(e => e.emotionLabel).slice(0, 3).join(', ') : 'neutral'}`,
+            `Primary emotions observed: ${emotionData.length > 0 ? emotionData.map(e => e.emotionLabel).slice(0, 3).join(', ') : 'neutral'}`,
             "Emotional responses were recorded throughout the session"
           ],
           riskAreas: [
@@ -109,10 +138,10 @@ const ReportPage: React.FC<ReportPageProps> = ({
             "Monitor for any behavioral changes or concerns"
           ],
           sessionMetadata: {
-            totalQuestions: history.length,
-            sessionDuration,
-            emotionVariability: emotionLog.length > 1 ? new Set(emotionLog.map(e => e.emotionLabel)).size / emotionLog.length : 0,
-            primaryEmotions: emotionLog.length > 0 ? emotionLog.map(e => e.emotionLabel).slice(0, 3) : ['neutral'],
+            totalQuestions: historyData.length,
+            sessionDuration: duration,
+            emotionVariability: emotionData.length > 1 ? new Set(emotionData.map(e => e.emotionLabel)).size / emotionData.length : 0,
+            primaryEmotions: emotionData.length > 0 ? emotionData.map(e => e.emotionLabel).slice(0, 3) : ['neutral'],
           },
         };
         
@@ -123,8 +152,13 @@ const ReportPage: React.FC<ReportPageProps> = ({
         setError('Failed to generate clinical report. Please try again or contact support.');
       }
     } finally {
+      console.log('Setting isGenerating to false');
       setIsGenerating(false);
     }
+  };
+
+  const generateReport = async () => {
+    await generateReportWithData(history, emotionLog, sessionDuration);
   };
 
   const downloadPDF = () => {
@@ -149,6 +183,24 @@ const ReportPage: React.FC<ReportPageProps> = ({
       navigate('/chat');
     }
   };
+
+  if (!dataLoaded) {
+    return (
+      <div style={{ 
+        minHeight: '100vh', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        background: '#f5f5f5'
+      }}>
+        <div style={{ textAlign: 'center', padding: 40 }}>
+          <div style={{ fontSize: 24, marginBottom: 16 }}>⏳</div>
+          <div style={{ fontSize: 18, marginBottom: 8 }}>Loading session data...</div>
+          <div style={{ fontSize: 14, color: '#666' }}>Please wait while we retrieve your screening data</div>
+        </div>
+      </div>
+    );
+  }
 
   if (isGenerating) {
     return (
