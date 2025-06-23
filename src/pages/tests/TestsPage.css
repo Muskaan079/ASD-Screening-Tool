@@ -1,0 +1,83 @@
+.tests-page {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.tests-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.tests-header h1 {
+  color: #2c3e50;
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.tests-header p {
+  color: #7f8c8d;
+  font-size: 1.2rem;
+}
+
+.tests-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  padding: 1rem;
+}
+
+.test-card {
+  background-color: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.test-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.test-card h2 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.test-card p {
+  color: #7f8c8d;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.start-test-button {
+  width: 100%;
+  padding: 1rem;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.start-test-button:hover {
+  background-color: #2980b9;
+}
+
+@media (max-width: 768px) {
+  .tests-page {
+    padding: 1rem;
+  }
+
+  .tests-header h1 {
+    font-size: 2rem;
+  }
+
+  .tests-grid {
+    grid-template-columns: 1fr;
+  }
+} 

@@ -143,4 +143,4 @@ This tool is for screening purposes only and does not provide a clinical diagnos
 
 ## 📞 Support
 
-For questions or issues, please open a GitHub issue or contact the development team. 
+For questions or issues, please open a GitHub issue or contact the development team.
