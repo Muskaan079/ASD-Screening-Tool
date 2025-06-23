@@ -1,21 +1,36 @@
 import React from 'react';
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
-interface MedicalVisualizationsProps {
-  clinicalRadarData: any[];
-  progressData: any[];
-  clinicalRiskData: any[];
-  decisionTree: any;
-  medicalColors: any;
-}
+const MedicalVisualizations: React.FC = () => {
+  // Sample data for radar chart (DSM-5 criteria)
+  const radarData = [
+    { criterion: 'Social Reciprocity', score: 65, fullMark: 100 },
+    { criterion: 'Nonverbal Comm.', score: 45, fullMark: 100 },
+    { criterion: 'Relationships', score: 75, fullMark: 100 },
+    { criterion: 'Stereotyped Behaviors', score: 40, fullMark: 100 },
+    { criterion: 'Insistence on Sameness', score: 55, fullMark: 100 },
+    { criterion: 'Restricted Interests', score: 70, fullMark: 100 },
+    { criterion: 'Sensory Processing', score: 50, fullMark: 100 },
+  ];
 
-const MedicalVisualizations: React.FC<MedicalVisualizationsProps> = ({
-  clinicalRadarData,
-  progressData,
-  clinicalRiskData,
-  decisionTree,
-  medicalColors
-}) => {
+  // Sample data for progress chart
+  const progressData = [
+    { name: 'Social Skills', completed: 35, total: 100 },
+    { name: 'Communication', completed: 45, total: 100 },
+    { name: 'Behavioral Flexibility', completed: 30, total: 100 },
+    { name: 'Sensory Integration', completed: 50, total: 100 },
+    { name: 'Executive Function', completed: 40, total: 100 },
+  ];
+
+  // Sample data for risk heatmap
+  const riskData = [
+    { domain: 'Social', risk: 75, impact: 'High' },
+    { domain: 'Communication', risk: 45, impact: 'Medium' },
+    { domain: 'Behavioral', risk: 70, impact: 'High' },
+    { domain: 'Sensory', risk: 50, impact: 'Medium' },
+    { domain: 'Cognitive', risk: 40, impact: 'Low' },
+  ];
+
   return (
     <div style={{ marginBottom: 40 }}>
       <h2 style={{ color: '#333', borderBottom: '2px solid #eee', paddingBottom: 15, fontSize: '1.8rem' }}>Clinical Visualizations</h2>
@@ -41,7 +56,7 @@ const MedicalVisualizations: React.FC<MedicalVisualizationsProps> = ({
             border: '1px solid #e9ecef'
           }}>
             <ResponsiveContainer width="100%" height={500}>
-              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={clinicalRadarData}>
+              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
                 <PolarGrid stroke="#e0e0e0" />
                 <PolarAngleAxis 
                   dataKey="criterion" 
@@ -57,8 +72,8 @@ const MedicalVisualizations: React.FC<MedicalVisualizationsProps> = ({
                 <Radar
                   name="Assessment Score"
                   dataKey="score"
-                  stroke={medicalColors.primary}
-                  fill={medicalColors.primary}
+                  stroke="#2E86AB"
+                  fill="#2E86AB"
                   fillOpacity={0.6}
                   strokeWidth={3}
                 />
@@ -106,8 +121,8 @@ const MedicalVisualizations: React.FC<MedicalVisualizationsProps> = ({
                   }}
                 />
                 <Legend />
-                <Bar dataKey="completed" fill={medicalColors.success} radius={[4, 4, 0, 0]} />
-                <Bar dataKey="total" fill={medicalColors.neutral} radius={[4, 4, 0, 0]} />
+                <Bar dataKey="completed" fill="#2E86AB" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="total" fill="#e9ecef" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
             <div style={{ textAlign: 'center', marginTop: 20 }}>
@@ -132,7 +147,7 @@ const MedicalVisualizations: React.FC<MedicalVisualizationsProps> = ({
             border: '1px solid #e9ecef'
           }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20 }}>
-              {clinicalRiskData.map((item, index) => (
+              {riskData.map((item, index) => (
                 <div key={index} style={{ textAlign: 'center' }}>
                   <div style={{
                     width: 120,
@@ -160,7 +175,7 @@ const MedicalVisualizations: React.FC<MedicalVisualizationsProps> = ({
                     background: item.risk > 70 ? '#dc3545' : item.risk > 50 ? '#fd7e14' : '#28a745',
                     color: 'white'
                   }}>
-                    {item.risk > 70 ? 'High' : item.risk > 50 ? 'Medium' : 'Low'} Risk
+                    {item.impact} Impact
                   </div>
                 </div>
               ))}
@@ -259,9 +274,10 @@ const MedicalVisualizations: React.FC<MedicalVisualizationsProps> = ({
                   color: '#666',
                   lineHeight: 1.8
                 }}>
-                  {decisionTree.nextSteps.map((step: string, index: number) => (
-                    <li key={index}>• {step}</li>
-                  ))}
+                  <li>• Schedule comprehensive diagnostic evaluation</li>
+                  <li>• Consult with developmental pediatrician</li>
+                  <li>• Begin early intervention planning</li>
+                  <li>• Monitor progress with follow-up assessments</li>
                 </ul>
               </div>
             </div>
