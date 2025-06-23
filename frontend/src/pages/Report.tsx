@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ConversationEntry } from '../services/adaptiveEngine';
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 export interface EmotionLogEntry {
   timestamp: Date;
@@ -127,6 +128,58 @@ const ReportPage: React.FC<ReportPageProps> = ({
       setIsGenerating(false);
     }
   };
+
+  // Prepare emotion trend data for charting
+  const prepareEmotionTrendData = (emotionLog: EmotionLogEntry[]) => {
+    return emotionLog.map((entry, index) => ({
+      time: index + 1,
+      emotion: entry.emotionLabel,
+      confidence: entry.confidence,
+      timestamp: entry.timestamp
+    }));
+  };
+
+  // Prepare risk heatmap data
+  const prepareRiskHeatmapData = (history: ConversationEntry[]) => {
+    const domains = ['Social Communication', 'Sensory Processing', 'Restricted Behaviors', 'Cognitive Patterns'];
+    const riskScores = domains.map(domain => {
+      const domainQuestions = history.filter(h => h.domain === domain);
+      if (domainQuestions.length === 0) return 0;
+      
+      // Calculate risk based on emotion responses and question count
+      const avgEmotionScore = domainQuestions.reduce((sum, q) => {
+        const emotionScore = q.emotion === 'anxious' || q.emotion === 'sad' ? 0.8 : 
+                           q.emotion === 'neutral' ? 0.5 : 0.3;
+        return sum + (emotionScore * (q.emotionConfidence || 0.5));
+      }, 0) / domainQuestions.length;
+      
+      return Math.min(1, avgEmotionScore + (domainQuestions.length * 0.1));
+    });
+
+    return domains.map((domain, index) => ({
+      domain,
+      risk: riskScores[index]
+    }));
+  };
+
+  // Prepare domain coverage data
+  const prepareDomainCoverageData = (history: ConversationEntry[]) => {
+    const domainCounts = history.reduce((acc, entry) => {
+      if (entry.domain) {
+        acc[entry.domain] = (acc[entry.domain] || 0) + 1;
+      }
+      return acc;
+    }, {} as Record<string, number>);
+
+    return Object.entries(domainCounts).map(([domain, count]) => ({
+      domain,
+      count,
+      percentage: (count / history.length) * 100
+    }));
+  };
+
+  // Color palette for charts
+  const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#ff0000', '#00ff00', '#0000ff'];
 
   const downloadPDF = () => {
     if (!report) return;
@@ -259,6 +312,14 @@ IMPORTANT: This is a screening report only and should not be used for diagnosis.
     );
   }
 
+  // Get data for visualizations
+  const emotionTrendData = prepareEmotionTrendData(propEmotionLog.length > 0 ? propEmotionLog : 
+    JSON.parse(sessionStorage.getItem('screeningEmotionLog') || '[]'));
+  const riskHeatmapData = prepareRiskHeatmapData(propHistory.length > 0 ? propHistory : 
+    JSON.parse(sessionStorage.getItem('screeningHistory') || '[]'));
+  const domainCoverageData = prepareDomainCoverageData(propHistory.length > 0 ? propHistory : 
+    JSON.parse(sessionStorage.getItem('screeningHistory') || '[]'));
+
   return (
     <div style={{ 
       minHeight: '100vh', 
@@ -266,7 +327,7 @@ IMPORTANT: This is a screening report only and should not be used for diagnosis.
       padding: '20px'
     }}>
       <div style={{ 
-        maxWidth: 800, 
+        maxWidth: 1200, 
         margin: '0 auto', 
         background: 'white',
         borderRadius: 12,
@@ -324,6 +385,171 @@ IMPORTANT: This is a screening report only and should not be used for diagnosis.
         <section style={{ marginBottom: 30 }}>
           <h2 style={{ color: '#333', borderBottom: '1px solid #eee', paddingBottom: 10 }}>Executive Summary</h2>
           <p style={{ fontSize: 16, lineHeight: 1.6, color: '#444' }}>{report.summary}</p>
+        </section>
+
+        {/* Visualizations Section */}
+        <section style={{ marginBottom: 30 }}>
+          <h2 style={{ color: '#333', borderBottom: '1px solid #eee', paddingBottom: 10 }}>Data Visualizations</h2>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: 24, marginTop: 20 }}>
+            
+            {/* Emotion Trend Chart */}
+            <div style={{ 
+              background: '#f8f9fa', 
+              padding: 20, 
+              borderRadius: 8,
+              border: '1px solid #e9ecef'
+            }}>
+              <h3 style={{ color: '#333', marginTop: 0, marginBottom: 16 }}>Emotion Trends Over Time</h3>
+              {emotionTrendData.length > 0 ? (
+                <div style={{ height: 250 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={emotionTrendData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                      <XAxis 
+                        dataKey="time" 
+                        label={{ value: 'Question Number', position: 'insideBottom', offset: -5 }}
+                        tick={{ fontSize: 12, fill: '#666' }}
+                      />
+                      <YAxis 
+                        tick={{ fontSize: 12, fill: '#666' }}
+                        label={{ value: 'Confidence', angle: -90, position: 'insideLeft' }}
+                      />
+                      <Tooltip 
+                        content={({ active, payload, label }) => {
+                          if (active && payload && payload.length) {
+                            return (
+                              <div style={{
+                                background: '#fff',
+                                border: '1px solid #ddd',
+                                borderRadius: 8,
+                                padding: 12,
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                              }}>
+                                <p style={{ margin: 0, fontWeight: 'bold' }}>Question {label}</p>
+                                <p style={{ margin: '4px 0 0 0' }}>
+                                  Emotion: {payload[0].payload.emotion}
+                                </p>
+                                <p style={{ margin: '4px 0 0 0' }}>
+                                  Confidence: {(payload[0].value * 100).toFixed(1)}%
+                                </p>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="confidence" 
+                        stroke="#8884d8" 
+                        strokeWidth={2}
+                        dot={{ fill: '#8884d8', strokeWidth: 2, r: 4 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', padding: 40, color: '#666' }}>
+                  No emotion data available
+                </div>
+              )}
+            </div>
+
+            {/* Risk Heatmap */}
+            <div style={{ 
+              background: '#f8f9fa', 
+              padding: 20, 
+              borderRadius: 8,
+              border: '1px solid #e9ecef'
+            }}>
+              <h3 style={{ color: '#333', marginTop: 0, marginBottom: 16 }}>Domain Risk Assessment</h3>
+              {riskHeatmapData.length > 0 ? (
+                <div style={{ height: 250 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={riskHeatmapData} layout="horizontal">
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                      <XAxis 
+                        type="number" 
+                        domain={[0, 1]}
+                        tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
+                        tick={{ fontSize: 12, fill: '#666' }}
+                      />
+                      <YAxis 
+                        type="category" 
+                        dataKey="domain" 
+                        width={120}
+                        tick={{ fontSize: 11, fill: '#333' }}
+                      />
+                      <Tooltip 
+                        formatter={(value: number) => [`${(value * 100).toFixed(1)}% risk`, 'Risk Level']}
+                        labelFormatter={(label) => `Domain: ${label}`}
+                      />
+                      <Bar 
+                        dataKey="risk" 
+                        fill={(entry: any) => {
+                          const risk = entry.risk;
+                          if (risk > 0.7) return '#dc3545'; // High risk - red
+                          if (risk > 0.4) return '#ffc107'; // Medium risk - yellow
+                          return '#28a745'; // Low risk - green
+                        }}
+                        radius={[0, 4, 4, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', padding: 40, color: '#666' }}>
+                  No domain data available
+                </div>
+              )}
+            </div>
+
+            {/* Domain Coverage Chart */}
+            <div style={{ 
+              background: '#f8f9fa', 
+              padding: 20, 
+              borderRadius: 8,
+              border: '1px solid #e9ecef',
+              gridColumn: 'span 2'
+            }}>
+              <h3 style={{ color: '#333', marginTop: 0, marginBottom: 16 }}>Domain Coverage Distribution</h3>
+              {domainCoverageData.length > 0 ? (
+                <div style={{ height: 250 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={domainCoverageData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ domain, percentage }) => `${domain}: ${percentage.toFixed(1)}%`}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="count"
+                      >
+                        {domainCoverageData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip 
+                        formatter={(value: number, name: string) => [
+                          `${value} questions`, 
+                          name
+                        ]}
+                      />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', padding: 40, color: '#666' }}>
+                  No domain coverage data available
+                </div>
+              )}
+            </div>
+
+          </div>
         </section>
 
         {/* Domains Addressed */}
