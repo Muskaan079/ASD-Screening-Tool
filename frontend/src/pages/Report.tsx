@@ -302,36 +302,6 @@ const ReportPage: React.FC<ReportPageProps> = ({
     return Math.min(1, (emotionRisk + questionRisk) / 2 + (questions.length * 0.05));
   };
 
-  // Prepare clinical decision tree data
-  const prepareClinicalDecisionTree = (report: ClinicalReport) => {
-    const riskLevel = report.riskAreas.length > 2 ? 'High' : 
-                     report.riskAreas.length > 1 ? 'Medium' : 'Low';
-    
-    const decisionTree = {
-      assessment: riskLevel,
-      nextSteps: riskLevel === 'High' ? [
-        'Immediate clinical evaluation recommended',
-        'Schedule comprehensive developmental assessment',
-        'Consider multidisciplinary team evaluation',
-        'Monitor for behavioral changes'
-      ] : riskLevel === 'Medium' ? [
-        'Follow-up assessment in 3-6 months',
-        'Consider targeted interventions',
-        'Monitor developmental progress',
-        'Parent/caregiver education'
-      ] : [
-        'Routine developmental monitoring',
-        'Annual screening recommended',
-        'Continue typical development support',
-        'Reassess if concerns arise'
-      ],
-      urgency: riskLevel === 'High' ? 'Immediate' : 
-               riskLevel === 'Medium' ? 'Within 3 months' : 'Routine'
-    };
-
-    return decisionTree;
-  };
-
   // Get data for visualizations
   const emotionTrendData = prepareEmotionTrendData(propEmotionLog.length > 0 ? propEmotionLog : 
     JSON.parse(sessionStorage.getItem('screeningEmotionLog') || '[]'));
@@ -339,18 +309,6 @@ const ReportPage: React.FC<ReportPageProps> = ({
     JSON.parse(sessionStorage.getItem('screeningHistory') || '[]'));
   const domainCoverageData = prepareDomainCoverageData(propHistory.length > 0 ? propHistory : 
     JSON.parse(sessionStorage.getItem('screeningHistory') || '[]'));
-
-  // New clinical visualization data
-  const clinicalRadarData = prepareClinicalRadarData(propHistory.length > 0 ? propHistory : 
-    JSON.parse(sessionStorage.getItem('screeningHistory') || '[]'), 
-    propEmotionLog.length > 0 ? propEmotionLog : 
-    JSON.parse(sessionStorage.getItem('screeningEmotionLog') || '[]'));
-  const progressData = prepareProgressData(propHistory.length > 0 ? propHistory : 
-    JSON.parse(sessionStorage.getItem('screeningHistory') || '[]'));
-  const clinicalRiskData = prepareClinicalRiskHeatmap(propHistory.length > 0 ? propHistory : 
-    JSON.parse(sessionStorage.getItem('screeningHistory') || '[]'),
-    propEmotionLog.length > 0 ? propEmotionLog : 
-    JSON.parse(sessionStorage.getItem('screeningEmotionLog') || '[]'));
 
   // Add fallback data if no real data is available (for demonstration)
   const finalEmotionTrendData = emotionTrendData.length > 0 ? emotionTrendData : [
