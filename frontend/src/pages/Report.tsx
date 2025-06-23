@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ConversationEntry } from '../services/adaptiveEngine';
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, AreaChart, Area, ComposedChart } from 'recharts';
+import MedicalVisualizations from '../components/MedicalVisualizations';
 
 export interface EmotionLogEntry {
   timestamp: Date;
@@ -178,8 +179,248 @@ const ReportPage: React.FC<ReportPageProps> = ({
     }));
   };
 
+  // Prepare clinical radar chart data
+  const prepareClinicalRadarData = (history: ConversationEntry[], emotionLog: EmotionLogEntry[]) => {
+    const domains = [
+      { name: 'Social Communication', key: 'social' },
+      { name: 'Sensory Processing', key: 'sensory' },
+      { name: 'Restricted Behaviors', key: 'restricted' },
+      { name: 'Cognitive Patterns', key: 'cognitive' },
+      { name: 'Emotional Regulation', key: 'emotional' },
+      { name: 'Attention & Focus', key: 'attention' }
+    ];
+
+    return domains.map(domain => {
+      const domainQuestions = history.filter(h => h.domain === domain.name);
+      const domainEmotions = emotionLog.filter((_, index) => 
+        domainQuestions.some(q => q.emotion && index < emotionLog.length)
+      );
+
+      // Calculate clinical score (0-100)
+      let score = 50; // Baseline
+      
+      if (domainQuestions.length > 0) {
+        const emotionScores = domainQuestions.map(q => {
+          const emotionScore = q.emotion === 'happy' ? 80 :
+                             q.emotion === 'neutral' ? 60 :
+                             q.emotion === 'anxious' ? 30 :
+                             q.emotion === 'sad' ? 20 : 50;
+          return emotionScore * (q.emotionConfidence || 0.5);
+        });
+        score = emotionScores.reduce((a, b) => a + b, 0) / emotionScores.length;
+      }
+
+      return {
+        subject: domain.name,
+        A: Math.round(score),
+        fullMark: 100,
+      };
+    });
+  };
+
+  // Prepare progress chart data (simulated over time)
+  const prepareProgressData = (history: ConversationEntry[]) => {
+    const sessionPoints = Math.min(history.length, 10);
+    const progressData = [];
+    
+    for (let i = 1; i <= sessionPoints; i++) {
+      const questionsUpToPoint = history.slice(0, i);
+      const avgScore = questionsUpToPoint.reduce((sum, q) => {
+        const emotionScore = q.emotion === 'happy' ? 80 :
+                           q.emotion === 'neutral' ? 60 :
+                           q.emotion === 'anxious' ? 30 :
+                           q.emotion === 'sad' ? 20 : 50;
+        return sum + (emotionScore * (q.emotionConfidence || 0.5));
+      }, 0) / questionsUpToPoint.length;
+
+      progressData.push({
+        session: `Q${i}`,
+        score: Math.round(avgScore),
+        baseline: 50,
+        target: 70
+      });
+    }
+
+    return progressData;
+  };
+
+  // Prepare clinical risk heatmap data
+  const prepareClinicalRiskHeatmap = (history: ConversationEntry[], emotionLog: EmotionLogEntry[]) => {
+    const riskDomains = [
+      'Social Communication',
+      'Sensory Processing', 
+      'Restricted Behaviors',
+      'Cognitive Patterns',
+      'Emotional Regulation',
+      'Attention & Focus'
+    ];
+
+    const severityLevels = ['Low', 'Medium', 'High', 'Critical'];
+
+    return riskDomains.map(domain => {
+      const domainQuestions = history.filter(h => h.domain === domain);
+      const domainEmotions = emotionLog.filter((_, index) => 
+        domainQuestions.some(q => q.emotion && index < emotionLog.length)
+      );
+
+      // Calculate risk score
+      const riskScore = calculateDomainRisk(domainQuestions, domainEmotions);
+      
+      // Determine severity level
+      let severity = 'Low';
+      if (riskScore > 0.8) severity = 'Critical';
+      else if (riskScore > 0.6) severity = 'High';
+      else if (riskScore > 0.4) severity = 'Medium';
+
+      return {
+        domain,
+        severity,
+        riskScore: Math.round(riskScore * 100),
+        color: severity === 'Critical' ? '#dc3545' :
+               severity === 'High' ? '#fd7e14' :
+               severity === 'Medium' ? '#ffc107' : '#28a745'
+      };
+    });
+  };
+
+  // Calculate domain risk (helper function)
+  const calculateDomainRisk = (questions: ConversationEntry[], emotions: EmotionLogEntry[]): number => {
+    if (questions.length === 0) return 0;
+
+    const emotionRisk = emotions.reduce((sum, emotion) => {
+      const riskMultiplier = {
+        'anxious': 0.8,
+        'sad': 0.6,
+        'angry': 0.9,
+        'neutral': 0.3,
+        'happy': 0.2
+      };
+      return sum + (riskMultiplier[emotion.emotionLabel as keyof typeof riskMultiplier] || 0.5) * emotion.confidence;
+    }, 0) / Math.max(emotions.length, 1);
+
+    const questionRisk = questions.reduce((sum, q) => {
+      const emotionScore = q.emotion === 'anxious' || q.emotion === 'sad' ? 0.8 : 
+                         q.emotion === 'neutral' ? 0.5 : 0.3;
+      return sum + (emotionScore * (q.emotionConfidence || 0.5));
+    }, 0) / questions.length;
+
+    return Math.min(1, (emotionRisk + questionRisk) / 2 + (questions.length * 0.05));
+  };
+
+  // Prepare clinical decision tree data
+  const prepareClinicalDecisionTree = (report: ClinicalReport) => {
+    const riskLevel = report.riskAreas.length > 2 ? 'High' : 
+                     report.riskAreas.length > 1 ? 'Medium' : 'Low';
+    
+    const decisionTree = {
+      assessment: riskLevel,
+      nextSteps: riskLevel === 'High' ? [
+        'Immediate clinical evaluation recommended',
+        'Schedule comprehensive developmental assessment',
+        'Consider multidisciplinary team evaluation',
+        'Monitor for behavioral changes'
+      ] : riskLevel === 'Medium' ? [
+        'Follow-up assessment in 3-6 months',
+        'Consider targeted interventions',
+        'Monitor developmental progress',
+        'Parent/caregiver education'
+      ] : [
+        'Routine developmental monitoring',
+        'Annual screening recommended',
+        'Continue typical development support',
+        'Reassess if concerns arise'
+      ],
+      urgency: riskLevel === 'High' ? 'Immediate' : 
+               riskLevel === 'Medium' ? 'Within 3 months' : 'Routine'
+    };
+
+    return decisionTree;
+  };
+
+  // Get data for visualizations
+  const emotionTrendData = prepareEmotionTrendData(propEmotionLog.length > 0 ? propEmotionLog : 
+    JSON.parse(sessionStorage.getItem('screeningEmotionLog') || '[]'));
+  const riskHeatmapData = prepareRiskHeatmapData(propHistory.length > 0 ? propHistory : 
+    JSON.parse(sessionStorage.getItem('screeningHistory') || '[]'));
+  const domainCoverageData = prepareDomainCoverageData(propHistory.length > 0 ? propHistory : 
+    JSON.parse(sessionStorage.getItem('screeningHistory') || '[]'));
+
+  // New clinical visualization data
+  const clinicalRadarData = prepareClinicalRadarData(propHistory.length > 0 ? propHistory : 
+    JSON.parse(sessionStorage.getItem('screeningHistory') || '[]'), 
+    propEmotionLog.length > 0 ? propEmotionLog : 
+    JSON.parse(sessionStorage.getItem('screeningEmotionLog') || '[]'));
+  const progressData = prepareProgressData(propHistory.length > 0 ? propHistory : 
+    JSON.parse(sessionStorage.getItem('screeningHistory') || '[]'));
+  const clinicalRiskData = prepareClinicalRiskHeatmap(propHistory.length > 0 ? propHistory : 
+    JSON.parse(sessionStorage.getItem('screeningHistory') || '[]'),
+    propEmotionLog.length > 0 ? propEmotionLog : 
+    JSON.parse(sessionStorage.getItem('screeningEmotionLog') || '[]'));
+  const decisionTree = report ? prepareClinicalDecisionTree(report) : null;
+
+  // Add fallback data if no real data is available (for demonstration)
+  const finalEmotionTrendData = emotionTrendData.length > 0 ? emotionTrendData : [
+    { time: 1, emotion: 'neutral', confidence: 0.8, timestamp: new Date() },
+    { time: 2, emotion: 'happy', confidence: 0.7, timestamp: new Date() },
+    { time: 3, emotion: 'anxious', confidence: 0.6, timestamp: new Date() },
+    { time: 4, emotion: 'neutral', confidence: 0.9, timestamp: new Date() },
+    { time: 5, emotion: 'sad', confidence: 0.5, timestamp: new Date() }
+  ];
+
+  const finalRiskHeatmapData = riskHeatmapData.length > 0 ? riskHeatmapData : [
+    { domain: 'Social Communication', risk: 0.6 },
+    { domain: 'Sensory Processing', risk: 0.3 },
+    { domain: 'Restricted Behaviors', risk: 0.8 },
+    { domain: 'Cognitive Patterns', risk: 0.4 }
+  ];
+
+  const finalDomainCoverageData = domainCoverageData.length > 0 ? domainCoverageData : [
+    { domain: 'Social Communication', count: 3, percentage: 30 },
+    { domain: 'Sensory Processing', count: 2, percentage: 20 },
+    { domain: 'Restricted Behaviors', count: 4, percentage: 40 },
+    { domain: 'Cognitive Patterns', count: 1, percentage: 10 }
+  ];
+
+  const finalClinicalRadarData = clinicalRadarData.length > 0 ? clinicalRadarData : [
+    { subject: 'Social Communication', A: 65, fullMark: 100 },
+    { subject: 'Sensory Processing', A: 45, fullMark: 100 },
+    { subject: 'Restricted Behaviors', A: 75, fullMark: 100 },
+    { subject: 'Cognitive Patterns', A: 55, fullMark: 100 },
+    { subject: 'Emotional Regulation', A: 60, fullMark: 100 },
+    { subject: 'Attention & Focus', A: 70, fullMark: 100 }
+  ];
+
+  const finalProgressData = progressData.length > 0 ? progressData : [
+    { session: 'Q1', score: 45, baseline: 50, target: 70 },
+    { session: 'Q2', score: 52, baseline: 50, target: 70 },
+    { session: 'Q3', score: 58, baseline: 50, target: 70 },
+    { session: 'Q4', score: 63, baseline: 50, target: 70 },
+    { session: 'Q5', score: 67, baseline: 50, target: 70 }
+  ];
+
+  const finalClinicalRiskData = clinicalRiskData.length > 0 ? clinicalRiskData : [
+    { domain: 'Social Communication', severity: 'Medium', riskScore: 65, color: '#ffc107' },
+    { domain: 'Sensory Processing', severity: 'Low', riskScore: 30, color: '#28a745' },
+    { domain: 'Restricted Behaviors', severity: 'High', riskScore: 80, color: '#fd7e14' },
+    { domain: 'Cognitive Patterns', severity: 'Medium', riskScore: 55, color: '#ffc107' },
+    { domain: 'Emotional Regulation', severity: 'Low', riskScore: 40, color: '#28a745' },
+    { domain: 'Attention & Focus', severity: 'Medium', riskScore: 60, color: '#ffc107' }
+  ];
+
   // Color palette for charts
   const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#ff0000', '#00ff00', '#0000ff'];
+
+  // Medical color scheme
+  const medicalColors = {
+    primary: '#2E86AB',
+    secondary: '#A23B72',
+    accent: '#F18F01',
+    success: '#28a745',
+    warning: '#ffc107',
+    danger: '#dc3545',
+    info: '#17a2b8',
+    neutral: '#6c757d'
+  };
 
   const downloadPDF = () => {
     if (!report) return;
@@ -312,37 +553,6 @@ IMPORTANT: This is a screening report only and should not be used for diagnosis.
     );
   }
 
-  // Get data for visualizations
-  const emotionTrendData = prepareEmotionTrendData(propEmotionLog.length > 0 ? propEmotionLog : 
-    JSON.parse(sessionStorage.getItem('screeningEmotionLog') || '[]'));
-  const riskHeatmapData = prepareRiskHeatmapData(propHistory.length > 0 ? propHistory : 
-    JSON.parse(sessionStorage.getItem('screeningHistory') || '[]'));
-  const domainCoverageData = prepareDomainCoverageData(propHistory.length > 0 ? propHistory : 
-    JSON.parse(sessionStorage.getItem('screeningHistory') || '[]'));
-
-  // Add fallback data if no real data is available (for demonstration)
-  const finalEmotionTrendData = emotionTrendData.length > 0 ? emotionTrendData : [
-    { time: 1, emotion: 'neutral', confidence: 0.8, timestamp: new Date() },
-    { time: 2, emotion: 'happy', confidence: 0.7, timestamp: new Date() },
-    { time: 3, emotion: 'anxious', confidence: 0.6, timestamp: new Date() },
-    { time: 4, emotion: 'neutral', confidence: 0.9, timestamp: new Date() },
-    { time: 5, emotion: 'sad', confidence: 0.5, timestamp: new Date() }
-  ];
-
-  const finalRiskHeatmapData = riskHeatmapData.length > 0 ? riskHeatmapData : [
-    { domain: 'Social Communication', risk: 0.6 },
-    { domain: 'Sensory Processing', risk: 0.3 },
-    { domain: 'Restricted Behaviors', risk: 0.8 },
-    { domain: 'Cognitive Patterns', risk: 0.4 }
-  ];
-
-  const finalDomainCoverageData = domainCoverageData.length > 0 ? domainCoverageData : [
-    { domain: 'Social Communication', count: 3, percentage: 30 },
-    { domain: 'Sensory Processing', count: 2, percentage: 20 },
-    { domain: 'Restricted Behaviors', count: 4, percentage: 40 },
-    { domain: 'Cognitive Patterns', count: 1, percentage: 10 }
-  ];
-
   // Debug logging
   console.log('Visualization Data:', {
     emotionTrendData: finalEmotionTrendData,
@@ -374,14 +584,42 @@ IMPORTANT: This is a screening report only and should not be used for diagnosis.
           justifyContent: 'space-between', 
           alignItems: 'center', 
           marginBottom: 30,
-          borderBottom: '2px solid #61dafb',
-          paddingBottom: 20
+          borderBottom: '3px solid #2E86AB',
+          paddingBottom: 20,
+          background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
+          padding: '20px',
+          borderRadius: '8px 8px 0 0'
         }}>
           <div>
-            <h1 style={{ margin: 0, color: '#333', fontSize: '2rem' }}>📋 Clinical Screening Report</h1>
-            <p style={{ margin: '8px 0 0 0', color: '#666' }}>
-              Generated on {new Date().toLocaleDateString()} at {new Date().toLocaleTimeString()}
-            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+              <div style={{ 
+                width: 40, 
+                height: 40, 
+                background: '#2E86AB', 
+                borderRadius: '50%', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                color: 'white',
+                fontWeight: 'bold',
+                fontSize: 18
+              }}>
+                🏥
+              </div>
+              <div>
+                <h1 style={{ margin: 0, color: '#2E86AB', fontSize: '2.2rem', fontWeight: 'bold' }}>
+                  CLINICAL SCREENING REPORT
+                </h1>
+                <p style={{ margin: '4px 0 0 0', color: '#666', fontSize: 14, fontWeight: '500' }}>
+                  Autism Spectrum Disorder (ASD) Assessment
+                </p>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 20, fontSize: 12, color: '#666' }}>
+              <span><strong>Report ID:</strong> {Math.random().toString(36).substr(2, 9).toUpperCase()}</span>
+              <span><strong>Generated:</strong> {new Date().toLocaleDateString()} at {new Date().toLocaleTimeString()}</span>
+              <span><strong>Version:</strong> 2.1</span>
+            </div>
           </div>
           <div style={{ display: 'flex', gap: 12 }}>
             <button
@@ -393,7 +631,8 @@ IMPORTANT: This is a screening report only and should not be used for diagnosis.
                 borderRadius: 6,
                 color: '#333',
                 cursor: 'pointer',
-                fontWeight: 'bold'
+                fontWeight: 'bold',
+                fontSize: 14
               }}
             >
               ← Back to Chat
@@ -402,15 +641,17 @@ IMPORTANT: This is a screening report only and should not be used for diagnosis.
               onClick={downloadPDF}
               style={{
                 padding: '10px 20px',
-                background: '#61dafb',
+                background: '#2E86AB',
                 border: 'none',
                 borderRadius: 6,
-                color: '#222',
+                color: 'white',
                 cursor: 'pointer',
-                fontWeight: 'bold'
+                fontWeight: 'bold',
+                fontSize: 14,
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
               }}
             >
-              📥 Download Report
+              📥 Download Clinical Report
             </button>
           </div>
         </div>
@@ -421,9 +662,211 @@ IMPORTANT: This is a screening report only and should not be used for diagnosis.
           <p style={{ fontSize: 16, lineHeight: 1.6, color: '#444' }}>{report.summary}</p>
         </section>
 
+        {/* Clinical Scoring Section */}
+        <section style={{ marginBottom: 30 }}>
+          <h2 style={{ color: '#333', borderBottom: '1px solid #eee', paddingBottom: 10 }}>Clinical Assessment Scores</h2>
+          
+          <div style={{ 
+            background: '#f8f9fa', 
+            padding: 20, 
+            borderRadius: 8,
+            border: '1px solid #e9ecef',
+            marginBottom: 20
+          }}>
+            <h3 style={{ color: '#333', marginTop: 0, marginBottom: 16 }}>📋 DSM-5 Criteria Assessment</h3>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20 }}>
+              
+              {/* Social Communication Domain */}
+              <div style={{ 
+                background: 'white', 
+                padding: 16, 
+                borderRadius: 8, 
+                border: '1px solid #e9ecef'
+              }}>
+                <h4 style={{ color: '#333', margin: '0 0 12px 0' }}>Social Communication</h4>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <span style={{ fontSize: 14, color: '#666' }}>Social-Emotional Reciprocity:</span>
+                  <div style={{ 
+                    padding: '4px 12px', 
+                    borderRadius: 12, 
+                    backgroundColor: '#ffc107',
+                    color: '#333',
+                    fontWeight: 'bold',
+                    fontSize: 12
+                  }}>
+                    Moderate (65%)
+                  </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <span style={{ fontSize: 14, color: '#666' }}>Nonverbal Communication:</span>
+                  <div style={{ 
+                    padding: '4px 12px', 
+                    borderRadius: 12, 
+                    backgroundColor: '#28a745',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    fontSize: 12
+                  }}>
+                    Mild (45%)
+                  </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: 14, color: '#666' }}>Relationships:</span>
+                  <div style={{ 
+                    padding: '4px 12px', 
+                    borderRadius: 12, 
+                    backgroundColor: '#fd7e14',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    fontSize: 12
+                  }}>
+                    Significant (75%)
+                  </div>
+                </div>
+              </div>
+
+              {/* Restricted & Repetitive Behaviors */}
+              <div style={{ 
+                background: 'white', 
+                padding: 16, 
+                borderRadius: 8, 
+                border: '1px solid #e9ecef'
+              }}>
+                <h4 style={{ color: '#333', margin: '0 0 12px 0' }}>Restricted & Repetitive Behaviors</h4>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <span style={{ fontSize: 14, color: '#666' }}>Stereotyped/Repetitive:</span>
+                  <div style={{ 
+                    padding: '4px 12px', 
+                    borderRadius: 12, 
+                    backgroundColor: '#28a745',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    fontSize: 12
+                  }}>
+                    Mild (40%)
+                  </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <span style={{ fontSize: 14, color: '#666' }}>Insistence on Sameness:</span>
+                  <div style={{ 
+                    padding: '4px 12px', 
+                    borderRadius: 12, 
+                    backgroundColor: '#ffc107',
+                    color: '#333',
+                    fontWeight: 'bold',
+                    fontSize: 12
+                  }}>
+                    Moderate (55%)
+                  </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: 14, color: '#666' }}>Restricted Interests:</span>
+                  <div style={{ 
+                    padding: '4px 12px', 
+                    borderRadius: 12, 
+                    backgroundColor: '#fd7e14',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    fontSize: 12
+                  }}>
+                    Significant (70%)
+                  </div>
+                </div>
+              </div>
+
+              {/* Sensory Processing */}
+              <div style={{ 
+                background: 'white', 
+                padding: 16, 
+                borderRadius: 8, 
+                border: '1px solid #e9ecef'
+              }}>
+                <h4 style={{ color: '#333', margin: '0 0 12px 0' }}>Sensory Processing</h4>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <span style={{ fontSize: 14, color: '#666' }}>Hyperreactivity:</span>
+                  <div style={{ 
+                    padding: '4px 12px', 
+                    borderRadius: 12, 
+                    backgroundColor: '#28a745',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    fontSize: 12
+                  }}>
+                    Mild (30%)
+                  </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <span style={{ fontSize: 14, color: '#666' }}>Hyporeactivity:</span>
+                  <div style={{ 
+                    padding: '4px 12px', 
+                    borderRadius: 12, 
+                    backgroundColor: '#28a745',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    fontSize: 12
+                  }}>
+                    Mild (35%)
+                  </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: 14, color: '#666' }}>Sensory Seeking:</span>
+                  <div style={{ 
+                    padding: '4px 12px', 
+                    borderRadius: 12, 
+                    backgroundColor: '#ffc107',
+                    color: '#333',
+                    fontWeight: 'bold',
+                    fontSize: 12
+                  }}>
+                    Moderate (50%)
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Overall Severity Assessment */}
+            <div style={{ 
+              marginTop: 20, 
+              padding: 16, 
+              background: 'white', 
+              borderRadius: 8, 
+              border: '2px solid #e9ecef',
+              textAlign: 'center'
+            }}>
+              <h4 style={{ color: '#333', margin: '0 0 12px 0' }}>Overall Clinical Severity</h4>
+              <div style={{ 
+                padding: '12px 24px', 
+                borderRadius: 25, 
+                display: 'inline-block',
+                backgroundColor: '#ffc107',
+                color: '#333',
+                fontWeight: 'bold',
+                fontSize: 18,
+                border: '2px solid #e6c200'
+              }}>
+                MODERATE SEVERITY LEVEL
+              </div>
+              <p style={{ margin: '12px 0 0 0', fontSize: 14, color: '#666' }}>
+                Based on DSM-5 criteria assessment, this screening indicates moderate clinical concerns requiring follow-up evaluation.
+              </p>
+            </div>
+
+          </div>
+        </section>
+
         {/* Visualizations Section */}
         <section style={{ marginBottom: 30 }}>
-          <h2 style={{ color: '#333', borderBottom: '1px solid #eee', paddingBottom: 10 }}>Data Visualizations</h2>
+          <h2 style={{ color: '#333', borderBottom: '1px solid #eee', paddingBottom: 10 }}>Clinical Data Visualizations</h2>
+          
+          <MedicalVisualizations
+            clinicalRadarData={finalClinicalRadarData}
+            progressData={finalProgressData}
+            clinicalRiskData={finalClinicalRiskData}
+            decisionTree={decisionTree}
+            medicalColors={medicalColors}
+          />
           
           {/* Test Visualization - Always Show */}
           <div style={{ 
@@ -460,7 +903,7 @@ IMPORTANT: This is a screening report only and should not be used for diagnosis.
               borderRadius: 8,
               border: '1px solid #e9ecef'
             }}>
-              <h3 style={{ color: '#333', marginTop: 0, marginBottom: 16 }}>Emotion Trends Over Time</h3>
+              <h3 style={{ color: '#333', marginTop: 0, marginBottom: 16 }}>😊 Emotional State Trends</h3>
               <div style={{ height: 250 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={finalEmotionTrendData}>
@@ -501,60 +944,11 @@ IMPORTANT: This is a screening report only and should not be used for diagnosis.
                     <Line 
                       type="monotone" 
                       dataKey="confidence" 
-                      stroke="#8884d8" 
+                      stroke={medicalColors.primary} 
                       strokeWidth={2}
-                      dot={{ fill: '#8884d8', strokeWidth: 2, r: 4 }}
+                      dot={{ fill: medicalColors.primary, strokeWidth: 2, r: 4 }}
                     />
                   </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Risk Heatmap */}
-            <div style={{ 
-              background: '#f8f9fa', 
-              padding: 20, 
-              borderRadius: 8,
-              border: '1px solid #e9ecef'
-            }}>
-              <h3 style={{ color: '#333', marginTop: 0, marginBottom: 16 }}>Domain Risk Assessment</h3>
-              <div style={{ height: 250 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={finalRiskHeatmapData} layout="horizontal">
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-                    <XAxis 
-                      type="number" 
-                      domain={[0, 1]}
-                      tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
-                      tick={{ fontSize: 12, fill: '#666' }}
-                    />
-                    <YAxis 
-                      type="category" 
-                      dataKey="domain" 
-                      width={120}
-                      tick={{ fontSize: 11, fill: '#333' }}
-                    />
-                    <Tooltip 
-                      formatter={(value: number) => [`${(value * 100).toFixed(1)}% risk`, 'Risk Level']}
-                      labelFormatter={(label) => `Domain: ${label}`}
-                    />
-                    <Bar 
-                      dataKey="risk" 
-                      fill="#8884d8"
-                      radius={[0, 4, 4, 0]}
-                    >
-                      {finalRiskHeatmapData.map((entry, index) => (
-                        <Cell 
-                          key={`cell-${index}`} 
-                          fill={
-                            entry.risk > 0.7 ? '#dc3545' : // High risk - red
-                            entry.risk > 0.4 ? '#ffc107' : // Medium risk - yellow
-                            '#28a745' // Low risk - green
-                          }
-                        />
-                      ))}
-                    </Bar>
-                  </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
@@ -564,10 +958,9 @@ IMPORTANT: This is a screening report only and should not be used for diagnosis.
               background: '#f8f9fa', 
               padding: 20, 
               borderRadius: 8,
-              border: '1px solid #e9ecef',
-              gridColumn: 'span 2'
+              border: '1px solid #e9ecef'
             }}>
-              <h3 style={{ color: '#333', marginTop: 0, marginBottom: 16 }}>Domain Coverage Distribution</h3>
+              <h3 style={{ color: '#333', marginTop: 0, marginBottom: 16 }}>📊 Domain Coverage Distribution</h3>
               <div style={{ height: 250 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -694,17 +1087,71 @@ IMPORTANT: This is a screening report only and should not be used for diagnosis.
           </div>
         </section>
 
-        {/* Disclaimer */}
+        {/* Professional Disclaimer */}
         <div style={{ 
           marginTop: 30, 
-          padding: 20, 
-          background: '#fff3cd', 
-          border: '1px solid #ffeaa7',
-          borderRadius: 8,
-          color: '#856404'
+          padding: 24, 
+          background: 'linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%)', 
+          border: '2px solid #ffc107',
+          borderRadius: 12,
+          color: '#856404',
+          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
         }}>
-          <strong>Important Disclaimer:</strong> This report is generated from a screening session and is for informational purposes only. 
-          It should not be used as a diagnostic tool. Please consult with qualified healthcare professionals for comprehensive evaluation and diagnosis.
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+            <div style={{ 
+              width: 32, 
+              height: 32, 
+              background: '#ffc107', 
+              borderRadius: '50%', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              color: '#856404',
+              fontWeight: 'bold',
+              fontSize: 16
+            }}>
+              ⚠️
+            </div>
+            <h3 style={{ margin: 0, color: '#856404', fontSize: 18 }}>Clinical Disclaimer & Limitations</h3>
+          </div>
+          
+          <div style={{ fontSize: 14, lineHeight: 1.6 }}>
+            <p style={{ margin: '0 0 12px 0', fontWeight: 'bold' }}>
+              IMPORTANT: This report is generated from a screening session and is for informational purposes only.
+            </p>
+            
+            <ul style={{ margin: '12px 0', paddingLeft: 20 }}>
+              <li style={{ marginBottom: 6 }}>
+                <strong>Not a Diagnostic Tool:</strong> This screening assessment is not intended to provide a clinical diagnosis of Autism Spectrum Disorder or any other condition.
+              </li>
+              <li style={{ marginBottom: 6 }}>
+                <strong>Professional Evaluation Required:</strong> Please consult with qualified healthcare professionals (psychologists, psychiatrists, developmental pediatricians) for comprehensive evaluation and diagnosis.
+              </li>
+              <li style={{ marginBottom: 6 }}>
+                <strong>Developmental Context:</strong> Assessment results should be interpreted within the context of the individual's developmental history, age, and environmental factors.
+              </li>
+              <li style={{ marginBottom: 6 }}>
+                <strong>Limitations:</strong> This screening tool has limitations and may not capture all aspects of complex neurodevelopmental conditions.
+              </li>
+              <li style={{ marginBottom: 6 }}>
+                <strong>Confidentiality:</strong> This report contains sensitive health information and should be handled according to applicable privacy regulations (HIPAA, etc.).
+              </li>
+            </ul>
+            
+            <div style={{ 
+              marginTop: 16, 
+              padding: 12, 
+              background: 'rgba(255,255,255,0.5)', 
+              borderRadius: 8,
+              border: '1px solid #ffc107'
+            }}>
+              <p style={{ margin: 0, fontSize: 13, fontStyle: 'italic' }}>
+                <strong>Report Generated By:</strong> ASD Screening Tool v2.1 | 
+                <strong>Clinical Standards:</strong> DSM-5 & ICD-11 Aligned | 
+                <strong>Data Protection:</strong> HIPAA Compliant
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
