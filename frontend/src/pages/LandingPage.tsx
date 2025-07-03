@@ -16,6 +16,10 @@ const LandingPage: React.FC = () => {
     navigate('/live-analysis');
   };
 
+  const handleEnhancedGesture = () => {
+    navigate('/enhanced-gesture');
+  };
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -133,6 +137,21 @@ const LandingPage: React.FC = () => {
               AI-powered dynamic screening based on responses
             </p>
           </div>
+
+          <div style={{
+            background: '#f7fafc',
+            padding: 24,
+            borderRadius: 12,
+            border: '1px solid #e2e8f0'
+          }}>
+            <div style={{ fontSize: 32, marginBottom: 12 }}>🎯</div>
+            <h3 style={{ margin: '0 0 8px 0', color: '#2d3748', fontSize: '1.1rem' }}>
+              Advanced Body Tracking
+            </h3>
+            <p style={{ margin: 0, color: '#4a5568', fontSize: '0.9rem' }}>
+              TensorFlow.js + MediaPipe for comprehensive gesture analysis
+            </p>
+          </div>
         </div>
 
         {/* Action Buttons */}
@@ -222,6 +241,35 @@ const LandingPage: React.FC = () => {
             }}
           >
             🧪 Test Gesture Analysis
+          </button>
+
+          <button
+            onClick={handleEnhancedGesture}
+            style={{
+              background: 'linear-gradient(135deg, #9c27b0 0%, #673ab7 100%)',
+              color: 'white',
+              border: 'none',
+              borderRadius: 50,
+              padding: '16px 32px',
+              fontSize: '1rem',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              boxShadow: '0 8px 16px rgba(156, 39, 176, 0.3)',
+              transition: 'all 0.3s ease',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 12
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 12px 24px rgba(156, 39, 176, 0.4)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 8px 16px rgba(156, 39, 176, 0.3)';
+            }}
+          >
+            🎯 Enhanced Gesture Analysis
           </button>
         </div>
 
