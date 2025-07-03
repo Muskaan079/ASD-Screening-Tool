@@ -31,23 +31,33 @@ const EyeTrackingAnalysis: React.FC<EyeTrackingAnalysisProps> = ({
   const trackingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const blinkIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Simulate eye tracking data
+  // Simulate eye tracking data with smoothing
   const simulateEyeTracking = useCallback(() => {
     if (!isActive) return;
 
     const screenWidth = window.innerWidth;
     const screenHeight = window.innerHeight;
     
-    // Simulate realistic gaze patterns
+    // Simulate realistic gaze patterns with smoothing
     const centerX = screenWidth / 2;
     const centerY = screenHeight / 2;
-    const gazeRadius = Math.min(screenWidth, screenHeight) * 0.3;
+    const gazeRadius = Math.min(screenWidth, screenHeight) * 0.2; // Reduced radius for less movement
     
-    // Add some natural movement around the center
+    // Use previous position for smoothing
+    const prevX = eyeTrackingData?.gazeX || centerX;
+    const prevY = eyeTrackingData?.gazeY || centerY;
+    
+    // Add small, smooth movements
+    const maxMovement = 50; // Maximum pixels to move per update
     const angle = Math.random() * Math.PI * 2;
-    const distance = Math.random() * gazeRadius;
-    const gazeX = centerX + Math.cos(angle) * distance;
-    const gazeY = centerY + Math.sin(angle) * distance;
+    const distance = Math.random() * maxMovement;
+    
+    const newX = prevX + Math.cos(angle) * distance;
+    const newY = prevY + Math.sin(angle) * distance;
+    
+    // Keep gaze within reasonable bounds
+    const gazeX = Math.max(0, Math.min(screenWidth, newX));
+    const gazeY = Math.max(0, Math.min(screenHeight, newY));
     
     // Simulate eye contact (70% chance when looking at screen center)
     const distanceFromCenter = Math.sqrt((gazeX - centerX) ** 2 + (gazeY - centerY) ** 2);
@@ -78,7 +88,7 @@ const EyeTrackingAnalysis: React.FC<EyeTrackingAnalysisProps> = ({
     if (onEyeTrackingData) {
       onEyeTrackingData(data);
     }
-  }, [isActive, onEyeTrackingData]);
+  }, [isActive, onEyeTrackingData, eyeTrackingData]);
 
   // Initialize eye tracking
   const initializeEyeTracking = useCallback(async () => {
@@ -110,7 +120,7 @@ const EyeTrackingAnalysis: React.FC<EyeTrackingAnalysisProps> = ({
   useEffect(() => {
     if (isActive && isInitialized) {
       // Start eye tracking simulation
-      trackingIntervalRef.current = setInterval(simulateEyeTracking, 100); // 10 FPS
+      trackingIntervalRef.current = setInterval(simulateEyeTracking, 500); // 2 FPS for smoother tracking
       
       // Simulate blink detection
       blinkIntervalRef.current = setInterval(() => {

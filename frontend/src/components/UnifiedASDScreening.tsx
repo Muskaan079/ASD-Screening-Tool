@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import apiService, { type EmotionData, type MotionData, type VoiceData } from '../services/api';
 import { useSpeechToText } from '../services/useSpeechToText';
 import EyeTrackingAnalysis from './EyeTrackingAnalysis';
+import UserInfoForm from './UserInfoForm';
 
 interface EyeTrackingData {
   gazeX: number;
@@ -117,15 +118,16 @@ interface UnifiedASDScreeningProps {
 }
 
 const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
-  patientInfo = { name: 'Test Patient', age: 8, gender: 'Male' },
+  patientInfo,
   onScreeningComplete,
   sessionDuration = 300
 }) => {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isScreening, setIsScreening] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [timeRemaining, setTimeRemaining] = useState(sessionDuration);
-  const [currentPhase, setCurrentPhase] = useState<'intro' | 'screening' | 'analysis' | 'complete'>('intro');
+  const [currentPhase, setCurrentPhase] = useState<'form' | 'intro' | 'screening' | 'analysis' | 'complete'>('form');
+  const [userInfo, setUserInfo] = useState(patientInfo || { name: '', age: 0, gender: '' });
   
   const [emotionData, setEmotionData] = useState<EmotionData | null>(null);
   const [motionData, setMotionData] = useState<MotionData | null>(null);
@@ -178,6 +180,12 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
       setError(`Initialization failed: ${error instanceof Error ? error.message : 'Unknown error'}. Please refresh and try again.`);
       setStatus('Initialization failed');
     }
+  }, []);
+
+  // Handle user info form submission
+  const handleUserInfoSubmit = useCallback((info: any) => {
+    setUserInfo(info);
+    setCurrentPhase('intro');
   }, []);
 
   // Eye tracking data handler
@@ -333,13 +341,18 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
 
   const startScreening = useCallback(async () => {
     try {
-      setIsScreening(true);
+      setIsLoading(true);
       setError(null);
+      
+      // Initialize models first
+      await initializeModels();
+      
+      setIsScreening(true);
       setCurrentPhase('screening');
       
       // Try to start backend session, but continue if it fails
       try {
-        const result = await apiService.startComprehensiveScreening(patientInfo);
+        const result = await apiService.startComprehensiveScreening(userInfo);
         setSessionId(result.sessionId);
       } catch (apiError) {
         console.warn('Backend not available, continuing with local analysis:', apiError);
@@ -387,7 +400,7 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
       setError('Failed to start screening session');
       console.error('Error starting screening:', error);
     }
-  }, [patientInfo, startVideoAnalysis, startListening, stopListening, analyzeEmotion, analyzeVoice]);
+  }, [userInfo, startVideoAnalysis, startListening, stopListening, analyzeEmotion, analyzeVoice]);
 
   const completeScreening = useCallback(async () => {
     setIsScreening(false);
@@ -429,7 +442,7 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
         const finalReport = sessionId.startsWith('local-session-') ? localReport : (report || localReport);
 
         const comprehensiveData: ASDScreeningData = {
-          patientInfo,
+          patientInfo: userInfo,
           sessionId,
           startTime: new Date(Date.now() - (sessionDuration - timeRemaining) * 1000),
           endTime: new Date(),
@@ -525,11 +538,9 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
       const stream = videoRef.current.srcObject as MediaStream;
       stream.getTracks().forEach(track => track.stop());
     }
-  }, [sessionId, emotionData, motionData, voiceData, eyeTrackingData, patientInfo, sessionDuration, timeRemaining, onScreeningComplete]);
+  }, [sessionId, emotionData, motionData, voiceData, eyeTrackingData, userInfo, sessionDuration, timeRemaining, onScreeningComplete]);
 
-  useEffect(() => {
-    initializeModels();
-  }, [initializeModels]);
+  // Remove the automatic initialization since we now start with the form
 
   useEffect(() => {
     return () => {
@@ -608,10 +619,10 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
         color: 'white'
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <strong>Patient:</strong> {patientInfo.name} ({patientInfo.age} years old)
-            {sessionId && <div style={{ fontSize: 12, opacity: 0.8 }}>Session: {sessionId}</div>}
-          </div>
+                  <div>
+          <strong>Patient:</strong> {userInfo.name} ({userInfo.age} years old)
+          {sessionId && <div style={{ fontSize: 12, opacity: 0.8 }}>Session: {sessionId}</div>}
+        </div>
           <div>
             {isScreening ? (
               <div style={{ fontWeight: 'bold', fontSize: 18 }}>
@@ -626,6 +637,13 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
         </div>
       </div>
 
+      {currentPhase === 'form' && (
+        <UserInfoForm
+          onSubmit={handleUserInfoSubmit}
+          onCancel={() => window.history.back()}
+        />
+      )}
+
       {currentPhase === 'intro' && (
         <div style={{ textAlign: 'center', padding: 40 }}>
           <div style={{ fontSize: 48, marginBottom: 20 }}>🧠</div>
@@ -634,6 +652,23 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
             This screening tool analyzes voice, gestures, text, emotions, and eye tracking to provide
             a comprehensive assessment for Autism Spectrum Disorder.
           </p>
+          <div style={{ 
+            marginBottom: 24, 
+            padding: 16, 
+            background: '#f8f9fa', 
+            borderRadius: 8, 
+            border: '1px solid #dee2e6',
+            maxWidth: 400,
+            marginLeft: 'auto',
+            marginRight: 'auto'
+          }}>
+            <div style={{ fontSize: 14, fontWeight: 'bold', marginBottom: 8 }}>Patient Information:</div>
+            <div style={{ fontSize: 14, color: '#666' }}>
+              <div><strong>Name:</strong> {userInfo.name}</div>
+              <div><strong>Age:</strong> {userInfo.age} years old</div>
+              <div><strong>Gender:</strong> {userInfo.gender}</div>
+            </div>
+          </div>
           <button
             onClick={startScreening}
             style={{
