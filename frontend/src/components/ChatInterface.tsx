@@ -899,9 +899,9 @@ const ChatInterface: React.FC = () => {
           }}>
             <h3 style={{ margin: '0 0 16px 0', color: '#2d3748' }}>🧠 AI Reasoning</h3>
             <ReasoningVisualizer 
-              factors={messages[messages.length - 1]?.reasoningFactors || []}
-              currentEmotion={currentEmotion}
-              emotionConfidence={emotionConfidence}
+              question={messages[messages.length - 1]?.text || "Waiting for next question..."}
+              reasoning={messages[messages.length - 1]?.reasoningFactors || []}
+              isVisible={messages.length > 0}
             />
           </div>
 
