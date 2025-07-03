@@ -258,7 +258,7 @@ const LiveGestureAnalysis: React.FC<LiveGestureAnalysisProps> = ({
           const emotionData: EmotionData = {
             dominant_emotion: dominantEmotion[0],
             confidence: dominantEmotion[1],
-            emotions: expressions,
+            emotions: Object.fromEntries(Object.entries(expressions)),
             timestamp: new Date().toISOString()
           };
 
@@ -668,7 +668,7 @@ const LiveGestureAnalysis: React.FC<LiveGestureAnalysisProps> = ({
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         @keyframes pulse {
           0% { opacity: 1; }
           50% { opacity: 0.5; }
