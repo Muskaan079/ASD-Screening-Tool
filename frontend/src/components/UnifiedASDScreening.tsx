@@ -1114,7 +1114,106 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: 20 }}>
+      {/* Debug Info - Remove this later */}
+      <div style={{ 
+        position: 'fixed', 
+        top: 10, 
+        right: 10, 
+        background: 'rgba(0,0,0,0.8)', 
+        color: 'white', 
+        padding: 8, 
+        borderRadius: 4, 
+        fontSize: 12,
+        zIndex: 1000
+      }}>
+        Phase: {currentPhase} | 
+        Screening: {isScreening ? 'Yes' : 'No'} | 
+        Data: {screeningData ? 'Yes' : 'No'} |
+        Report: {showReport ? 'Yes' : 'No'}
+      </div>
+      
       <h1 style={{ textAlign: 'center', marginBottom: 20 }}>🧠 Comprehensive ASD Screening</h1>
+      
+      {/* Test Report Button - Remove this later */}
+      <div style={{ textAlign: 'center', marginBottom: 20 }}>
+        <button
+          onClick={() => {
+            const testData: ASDScreeningData = {
+              patientInfo: { name: 'Test Patient', age: 8, gender: 'Male' },
+              sessionId: 'test-session-123',
+              startTime: new Date(),
+              endTime: new Date(),
+              duration: 300,
+              emotionAnalysis: {
+                dominantEmotion: 'neutral',
+                emotionHistory: [],
+                emotionStability: 0.7,
+                socialEmotionResponses: 0.6
+              },
+              gestureAnalysis: {
+                repetitiveMotions: false,
+                handFlapping: false,
+                rockingMotion: false,
+                fidgeting: false,
+                gestureHistory: [],
+                motorCoordination: 0.8
+              },
+              voiceAnalysis: {
+                prosody: { pitch: 0.5, volume: 0.5, speechRate: 0.5, clarity: 0.5 },
+                voiceEmotion: 'neutral',
+                speechPatterns: [],
+                voiceHistory: [],
+                communicationStyle: 0.7
+              },
+              eyeTrackingAnalysis: {
+                eyeContactDuration: 0.6,
+                gazePatterns: ['focused'],
+                attentionSpan: 0.7,
+                socialEngagement: 0.6,
+                eyeTrackingHistory: []
+              },
+              textAnalysis: {
+                responses: [],
+                languageComplexity: 0.7,
+                socialUnderstanding: 0.6
+              },
+              behavioralObservations: {
+                eyeContact: 0.6,
+                socialEngagement: 0.6,
+                repetitiveBehaviors: [],
+                sensoryResponses: [],
+                attentionSpan: 0.7
+              },
+              screeningResults: {
+                overallScore: 0.65,
+                riskLevel: 'medium',
+                domains: {
+                  social: 0.6,
+                  communication: 0.7,
+                  behavior: 0.8,
+                  sensory: 0.7
+                },
+                recommendations: ['Continue monitoring', 'Follow up in 3 months'],
+                nextSteps: ['Schedule assessment', 'Monitor development']
+              }
+            };
+            setScreeningData(testData);
+            setShowReport(true);
+          }}
+          style={{
+            padding: '8px 16px',
+            background: '#ffc107',
+            color: 'black',
+            border: 'none',
+            borderRadius: 4,
+            fontSize: 12,
+            cursor: 'pointer',
+            marginRight: 8
+          }}
+        >
+          🧪 Test Report
+        </button>
+      </div>
       
       <div style={{ 
         marginBottom: 20, 
@@ -1345,6 +1444,46 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
       {currentPhase === 'complete' && screeningData && (
         <div style={{ padding: 24, background: '#f8f9fa', borderRadius: 12 }}>
           <h2 style={{ marginBottom: 20, color: '#28a745' }}>✅ Screening Complete</h2>
+          
+          {/* Prominent Report Button at the top */}
+          <div style={{ 
+            textAlign: 'center', 
+            marginBottom: 24, 
+            padding: 20, 
+            background: 'linear-gradient(135deg, #007bff 0%, #0056b3 100%)',
+            borderRadius: 12,
+            color: 'white'
+          }}>
+            <h3 style={{ margin: '0 0 12px 0', fontSize: 24 }}>📊 Generate Professional Medical Report</h3>
+            <p style={{ margin: '0 0 16px 0', opacity: 0.9 }}>
+              Create a comprehensive report with charts, analysis, and clinical recommendations
+            </p>
+            <button
+              onClick={() => setShowReport(true)}
+              style={{
+                padding: '16px 32px',
+                background: 'rgba(255, 255, 255, 0.2)',
+                color: 'white',
+                border: '2px solid white',
+                borderRadius: 50,
+                fontSize: 18,
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                marginRight: 16
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              📋 Generate Medical Report
+            </button>
+          </div>
           
           <div style={{ 
             marginBottom: 24, 
