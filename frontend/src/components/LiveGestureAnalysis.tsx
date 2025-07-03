@@ -3,6 +3,7 @@ import * as faceapi from 'face-api.js';
 import apiService, { type EmotionData, type MotionData } from '../services/api';
 
 // Live Gesture Analysis Component - Fixed TypeScript issues
+// Inspired by DREAM dataset structure for autism therapy analysis
 interface LiveGestureAnalysisProps {
   onAnalysisComplete?: (results: any) => void;
   sessionDuration?: number; // in seconds
@@ -11,6 +12,20 @@ interface LiveGestureAnalysisProps {
     age: number;
     gender?: string;
   };
+}
+
+// DREAM-inspired skeleton structure
+interface SkeletonData {
+  head: { x: number; y: number; z: number; confidence: number };
+  shoulder_center: { x: number; y: number; z: number; confidence: number };
+  shoulder_left: { x: number; y: number; z: number; confidence: number };
+  shoulder_right: { x: number; y: number; z: number; confidence: number };
+  elbow_left: { x: number; y: number; z: number; confidence: number };
+  elbow_right: { x: number; y: number; z: number; confidence: number };
+  wrist_left: { x: number; y: number; z: number; confidence: number };
+  wrist_right: { x: number; y: number; z: number; confidence: number };
+  hand_left: { x: number; y: number; z: number; confidence: number };
+  hand_right: { x: number; y: number; z: number; confidence: number };
 }
 
 const LiveGestureAnalysis: React.FC<LiveGestureAnalysisProps> = ({
@@ -32,6 +47,8 @@ const LiveGestureAnalysis: React.FC<LiveGestureAnalysisProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [emotionHistory, setEmotionHistory] = useState<Array<{emotion: string, confidence: number, timestamp: number}>>([]);
   const [motionHistory, setMotionHistory] = useState<Array<{motions: string[], timestamp: number}>>([]);
+  const [cameraStatus, setCameraStatus] = useState<string>('Initializing...');
+  const [skeletonData, setSkeletonData] = useState<SkeletonData | null>(null);
 
   // MediaPipe Hands setup
   const handsRef = useRef<any>(null);
@@ -43,6 +60,7 @@ const LiveGestureAnalysis: React.FC<LiveGestureAnalysisProps> = ({
     try {
       setIsLoading(true);
       setError(null);
+      setCameraStatus('Loading emotion detection models...');
 
       const modelUrls = [
         'https://justadudewhohacks.github.io/face-api.js/models',
@@ -70,9 +88,11 @@ const LiveGestureAnalysis: React.FC<LiveGestureAnalysisProps> = ({
         throw new Error('Failed to load face models from all sources');
       }
 
+      setCameraStatus('Models loaded successfully');
       setIsLoading(false);
     } catch (err) {
       setError('Failed to load emotion detection models. Please check your internet connection.');
+      setCameraStatus('Model loading failed');
       setIsLoading(false);
       console.error('Error loading models:', err);
     }
@@ -81,6 +101,7 @@ const LiveGestureAnalysis: React.FC<LiveGestureAnalysisProps> = ({
   // Load MediaPipe Hands
   const loadHandTracking = useCallback(async () => {
     try {
+      setCameraStatus('Loading hand tracking...');
       const { Hands, HAND_CONNECTIONS } = await import('@mediapipe/hands');
       const { Camera } = await import('@mediapipe/camera_utils');
       const { drawConnectors, drawLandmarks } = await import('@mediapipe/drawing_utils');
@@ -110,6 +131,7 @@ const LiveGestureAnalysis: React.FC<LiveGestureAnalysisProps> = ({
 
         const newMotionPoints: Array<{x: number, y: number, type: string}> = [];
         const newDetectedMotions: string[] = [];
+        const newSkeletonData: Partial<SkeletonData> = {};
 
         if (results.multiHandLandmarks) {
           results.multiHandLandmarks.forEach((landmarks: any, index: number) => {
@@ -128,14 +150,26 @@ const LiveGestureAnalysis: React.FC<LiveGestureAnalysisProps> = ({
               radius: 3
             });
 
-            // Analyze motion patterns
+            // Convert to DREAM-inspired skeleton format
             landmarks.forEach((landmark: any, landmarkIndex: number) => {
               const x = landmark.x * canvas.width;
               const y = landmark.y * canvas.height;
+              const z = landmark.z;
               
               newMotionPoints.push({
                 x, y, type: `${handedness}_landmark_${landmarkIndex}`
               });
+
+              // Map MediaPipe landmarks to DREAM skeleton structure
+              if (landmarkIndex === 0) { // Wrist
+                newSkeletonData[`wrist_${handedness.toLowerCase()}`] = {
+                  x, y, z, confidence: 0.8
+                };
+              } else if (landmarkIndex === 4) { // Thumb tip
+                newSkeletonData[`hand_${handedness.toLowerCase()}`] = {
+                  x, y, z, confidence: 0.8
+                };
+              }
 
               // Detect specific motions
               if (landmarkIndex === 8) { // Index finger tip
@@ -165,6 +199,7 @@ const LiveGestureAnalysis: React.FC<LiveGestureAnalysisProps> = ({
 
         setMotionPoints(newMotionPoints);
         setDetectedMotions(newDetectedMotions);
+        setSkeletonData(newSkeletonData as SkeletonData);
 
         // Add to motion history
         if (newDetectedMotions.length > 0) {
@@ -180,6 +215,7 @@ const LiveGestureAnalysis: React.FC<LiveGestureAnalysisProps> = ({
             motion_data: {
               landmarks: results.multiHandLandmarks,
               motionPoints: newMotionPoints,
+              skeleton: newSkeletonData,
               timestamp: Date.now()
             },
             timestamp: new Date().toISOString()
@@ -189,30 +225,19 @@ const LiveGestureAnalysis: React.FC<LiveGestureAnalysisProps> = ({
         }
       });
 
-      // Initialize camera
-      if (videoRef.current) {
-        cameraRef.current = new Camera(videoRef.current, {
-          onFrame: async () => {
-            if (handsRef.current && videoRef.current) {
-              await handsRef.current.send({ image: videoRef.current });
-            }
-          },
-          width: 640,
-          height: 480
-        });
-
-        await cameraRef.current.start();
-        console.log('Hand tracking initialized successfully');
-      }
+      setCameraStatus('Hand tracking initialized');
+      console.log('Hand tracking initialized successfully');
 
     } catch (err) {
       console.warn('Hand tracking not available:', err);
+      setCameraStatus('Hand tracking failed - continuing with emotion detection only');
     }
   }, [isRecording, sessionId]);
 
   // Start video stream
   const startVideo = useCallback(async () => {
     try {
+      setCameraStatus('Requesting camera access...');
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           width: 640,
@@ -223,10 +248,22 @@ const LiveGestureAnalysis: React.FC<LiveGestureAnalysisProps> = ({
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        setCameraStatus('Camera active - video feed should be visible');
         setIsRecording(true);
+        
+        // Ensure video is visible
+        videoRef.current.onloadedmetadata = () => {
+          console.log('Video metadata loaded, dimensions:', videoRef.current?.videoWidth, 'x', videoRef.current?.videoHeight);
+        };
+        
+        videoRef.current.onplay = () => {
+          console.log('Video started playing');
+          setCameraStatus('Live video feed active');
+        };
       }
     } catch (err) {
       setError('Failed to access camera. Please check camera permissions.');
+      setCameraStatus('Camera access failed');
       console.error('Error starting video:', err);
     }
   }, []);
@@ -371,8 +408,8 @@ const LiveGestureAnalysis: React.FC<LiveGestureAnalysisProps> = ({
   if (isLoading) {
     return (
       <div style={{ textAlign: 'center', padding: 40 }}>
-        <div style={{ fontSize: 24, marginBottom: 16 }}>🔄</div>
-        <div>Loading gesture analysis models...</div>
+        <div style={{ fontSize: 24, marginBottom: 16 }}>��</div>
+        <div>{cameraStatus}</div>
         <div style={{ fontSize: 12, color: '#666', marginTop: 8 }}>
           This may take a few moments on first load
         </div>
@@ -452,9 +489,31 @@ const LiveGestureAnalysis: React.FC<LiveGestureAnalysisProps> = ({
               style={{
                 width: '100%',
                 height: 'auto',
-                display: 'block'
+                display: 'block',
+                minHeight: '300px',
+                backgroundColor: '#000'
               }}
             />
+            
+            {/* Camera Status Overlay */}
+            {!isRecording && (
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                background: 'rgba(0,0,0,0.8)',
+                color: 'white',
+                padding: '20px',
+                borderRadius: '8px',
+                textAlign: 'center',
+                zIndex: 10
+              }}>
+                <div style={{ fontSize: 24, marginBottom: 8 }}>📹</div>
+                <div style={{ fontSize: 16, marginBottom: 4 }}>Camera Ready</div>
+                <div style={{ fontSize: 12, opacity: 0.8 }}>{cameraStatus}</div>
+              </div>
+            )}
             <canvas
               ref={canvasRef}
               style={{
@@ -569,6 +628,23 @@ const LiveGestureAnalysis: React.FC<LiveGestureAnalysisProps> = ({
               <div>Duration: {sessionDuration - timeRemaining}s</div>
             </div>
           </div>
+
+          {/* DREAM-inspired Skeleton Data */}
+          {skeletonData && (
+            <div style={{ padding: 16, background: '#e8f4fd', borderRadius: 12, border: '1px solid #b3d9ff' }}>
+              <h4 style={{ margin: '0 0 12px 0', color: '#0066cc' }}>🦴 DREAM Skeleton</h4>
+              <div style={{ fontSize: 12, color: '#666' }}>
+                {Object.entries(skeletonData).map(([joint, data]) => (
+                  <div key={joint} style={{ marginBottom: 2 }}>
+                    <strong>{joint}:</strong> ({data.x.toFixed(1)}, {data.y.toFixed(1)}, {data.z.toFixed(1)}) 
+                    <span style={{ color: data.confidence > 0.7 ? '#28a745' : '#ffc107' }}>
+                      {data.confidence > 0.7 ? '✓' : '⚠'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
