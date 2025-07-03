@@ -3,7 +3,7 @@ import './App.css';
 import LandingPage from './pages/LandingPage';
 import ChatInterface from './components/ChatInterface';
 import ReportPage from './pages/Report';
-import GestureAnalysisTest from './components/GestureAnalysisTest';
+import LiveGestureAnalysis from './components/LiveGestureAnalysis';
 import LiveAnalysis from './pages/LiveAnalysis';
 
 function App() {
@@ -14,7 +14,13 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/chat" element={<ChatInterface />} />
           <Route path="/report" element={<ReportPage />} />
-          <Route path="/test-gesture" element={<GestureAnalysisTest />} />
+          <Route path="/test-gesture" element={
+            <LiveGestureAnalysis 
+              patientInfo={{ name: 'Test Patient', age: 8, gender: 'Male' }}
+              sessionDuration={30}
+              onAnalysisComplete={(results) => console.log('Test completed:', results)}
+            />
+          } />
           <Route path="/live-analysis" element={<LiveAnalysis />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

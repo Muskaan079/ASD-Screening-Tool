@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiService from '../services/api';
 
-const GestureAnalysisTest: React.FC = () => {
+const RealTimeGestureTest: React.FC = () => {
   const navigate = useNavigate();
   const [backendStatus, setBackendStatus] = useState<string>('Checking...');
   const [testResults, setTestResults] = useState<any>(null);
@@ -432,4 +432,4 @@ const GestureAnalysisTest: React.FC = () => {
   );
 };
 
-export default GestureAnalysisTest; 
+export default RealTimeGestureTest; 
