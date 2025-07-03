@@ -490,6 +490,9 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
       setIsLoading(true);
       setError(null);
       
+      // Reset timer to ensure it starts from the correct value
+      setTimeRemaining(sessionDuration);
+      
       // Initialize models first
       await initializeModels();
       
@@ -515,13 +518,22 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
       
       // Eye tracking is handled by the EyeTrackingAnalysis component
       
-      const countdownInterval = setInterval(() => {
+      // Store interval references for cleanup
+      const intervals = {
+        emotion: emotionInterval,
+        voice: voiceInterval,
+        gesture: gestureInterval,
+        countdown: null as NodeJS.Timeout | null
+      };
+
+      intervals.countdown = setInterval(() => {
         setTimeRemaining(prev => {
+          console.log('Timer tick:', prev); // Debug log
           if (prev <= 1) {
-            clearInterval(countdownInterval);
-            clearInterval(emotionInterval);
-            clearInterval(voiceInterval);
-            clearInterval(gestureInterval);
+            // Clear all intervals
+            Object.values(intervals).forEach(interval => {
+              if (interval) clearInterval(interval);
+            });
             if (eyeTrackingIntervalRef.current) {
               clearInterval(eyeTrackingIntervalRef.current);
             }
@@ -536,13 +548,13 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
       setStatus('Comprehensive screening in progress...');
       
       return () => {
-        clearInterval(emotionInterval);
-        clearInterval(voiceInterval);
-        clearInterval(gestureInterval);
+        // Clear all intervals
+        Object.values(intervals).forEach(interval => {
+          if (interval) clearInterval(interval);
+        });
         if (eyeTrackingIntervalRef.current) {
           clearInterval(eyeTrackingIntervalRef.current);
         }
-        clearInterval(countdownInterval);
       };
     } catch (error) {
       setIsScreening(false);
