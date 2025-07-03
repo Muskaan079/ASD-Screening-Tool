@@ -1,17 +1,26 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import EnhancedEmotionTracker from './EnhancedEmotionTracker';
 import { useRepetitiveMotionAnalysis } from '../hooks/useRepetitiveMotionAnalysis';
+import apiService, { type EmotionData, type MotionData } from '../services/api';
 
 interface IntegratedASDTrackerProps {
   onSessionComplete?: (sessionData: any) => void;
   width?: number;
   height?: number;
+  sessionId?: string; // Backend session ID
+  patientInfo?: {
+    name: string;
+    age: number;
+    gender?: string;
+  };
 }
 
 const IntegratedASDTracker: React.FC<IntegratedASDTrackerProps> = ({
   onSessionComplete,
   width = 640,
   height = 480,
+  sessionId,
+  patientInfo,
 }) => {
   const [sessionActive, setSessionActive] = useState(false);
   const [sessionData, setSessionData] = useState<any>({
@@ -21,6 +30,9 @@ const IntegratedASDTracker: React.FC<IntegratedASDTrackerProps> = ({
     startTime: null,
     endTime: null
   });
+  const [backendSessionId, setBackendSessionId] = useState<string | null>(sessionId || null);
+  const [backendConnected, setBackendConnected] = useState(false);
+  const [backendError, setBackendError] = useState<string | null>(null);
 
   // Initialize repetitive motion analysis
   const {
@@ -32,9 +44,33 @@ const IntegratedASDTracker: React.FC<IntegratedASDTrackerProps> = ({
     dataCount
   } = useRepetitiveMotionAnalysis(100, 1000);
 
+  // Check backend connection
+  useEffect(() => {
+    const checkBackendHealth = async () => {
+      try {
+        await apiService.checkHealth();
+        setBackendConnected(true);
+        setBackendError(null);
+      } catch (error) {
+        setBackendConnected(false);
+        setBackendError('Backend connection failed. Gesture analysis will work locally only.');
+        console.warn('Backend not available:', error);
+      }
+    };
+    
+    checkBackendHealth();
+  }, []);
+
   // Handle emotion detection
-  const handleEmotionDetected = useCallback((emotion: string, confidence: number) => {
+  const handleEmotionDetected = useCallback(async (emotion: string, confidence: number) => {
     if (!sessionActive) return;
+
+    const emotionData: EmotionData = {
+      dominant_emotion: emotion,
+      confidence: confidence,
+      emotions: { [emotion]: confidence },
+      timestamp: new Date().toISOString()
+    };
 
     setSessionData(prev => ({
       ...prev,
@@ -44,10 +80,19 @@ const IntegratedASDTracker: React.FC<IntegratedASDTrackerProps> = ({
         timestamp: Date.now()
       }]
     }));
-  }, [sessionActive]);
+
+    // Send to backend if connected
+    if (backendConnected && backendSessionId) {
+      try {
+        await apiService.updateEmotionData(backendSessionId, emotionData);
+      } catch (error) {
+        console.warn('Failed to send emotion data to backend:', error);
+      }
+    }
+  }, [sessionActive, backendConnected, backendSessionId]);
 
   // Handle wrist data detection
-  const handleWristDataDetected = useCallback((handData: any) => {
+  const handleWristDataDetected = useCallback(async (handData: any) => {
     if (!sessionActive) return;
 
     // Add to repetitive motion analysis
@@ -58,7 +103,24 @@ const IntegratedASDTracker: React.FC<IntegratedASDTrackerProps> = ({
       ...prev,
       wristData: [...prev.wristData, handData]
     }));
-  }, [sessionActive, addWristData]);
+
+    // Send to backend if connected
+    if (backendConnected && backendSessionId) {
+      try {
+        const motionData: MotionData = {
+          repetitive_motions: false, // Will be updated by analysis
+          fidgeting: false, // Will be updated by analysis
+          patterns: [],
+          motion_data: handData,
+          timestamp: new Date().toISOString()
+        };
+        
+        await apiService.updateMotionData(backendSessionId, motionData);
+      } catch (error) {
+        console.warn('Failed to send motion data to backend:', error);
+      }
+    }
+  }, [sessionActive, addWristData, backendConnected, backendSessionId]);
 
   // Handle repetitive motion analysis
   const handleRepetitiveMotionDetected = useCallback((analysis: any) => {
@@ -74,7 +136,7 @@ const IntegratedASDTracker: React.FC<IntegratedASDTrackerProps> = ({
   }, [sessionActive]);
 
   // Start session
-  const startSession = useCallback(() => {
+  const startSession = useCallback(async () => {
     setSessionActive(true);
     clearHistory();
     setSessionData({
@@ -84,7 +146,18 @@ const IntegratedASDTracker: React.FC<IntegratedASDTrackerProps> = ({
       startTime: Date.now(),
       endTime: null
     });
-  }, [clearHistory]);
+
+    // Create backend session if not provided and backend is connected
+    if (!backendSessionId && backendConnected && patientInfo) {
+      try {
+        const result = await apiService.startScreening(patientInfo);
+        setBackendSessionId(result.sessionId);
+        console.log('Backend session created:', result.sessionId);
+      } catch (error) {
+        console.warn('Failed to create backend session:', error);
+      }
+    }
+  }, [clearHistory, backendSessionId, backendConnected, patientInfo]);
 
   // Stop session
   const stopSession = useCallback(() => {
@@ -149,8 +222,14 @@ const IntegratedASDTracker: React.FC<IntegratedASDTrackerProps> = ({
           <div style={{ fontSize: 14, color: '#666' }}>
             Status: {sessionActive ? '🟢 Active' : '🔴 Inactive'} | 
             Duration: {getSessionDuration()} | 
-            Data Points: {dataCount}
+            Data Points: {dataCount} |
+            Backend: {backendConnected ? '🟢 Connected' : '🔴 Disconnected'}
           </div>
+          {backendError && (
+            <div style={{ fontSize: 12, color: '#dc3545', marginTop: 4 }}>
+              ⚠️ {backendError}
+            </div>
+          )}
         </div>
         
         <div>

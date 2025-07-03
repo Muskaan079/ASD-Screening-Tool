@@ -1,8 +1,8 @@
-import databaseService from '../services/databaseService.js';
+import memoryDatabaseService from '../services/memoryDatabaseService.js';
 
 export const getSessionStatistics = async (req, res) => {
   try {
-    const statistics = await databaseService.getSessionStatistics();
+    const statistics = await memoryDatabaseService.getSessionStatistics();
     
     res.json({
       success: true,
@@ -19,7 +19,7 @@ export const getSessionStatistics = async (req, res) => {
 
 export const getCategoryAnalytics = async (req, res) => {
   try {
-    const analytics = await databaseService.getCategoryAnalytics();
+    const analytics = await memoryDatabaseService.getCategoryAnalytics();
     
     res.json({
       success: true,
@@ -51,7 +51,7 @@ export const getSessionHistory = async (req, res) => {
     if (startDate) filters.startDate = startDate;
     if (endDate) filters.endDate = endDate;
 
-    const sessions = await databaseService.listSessions(filters);
+    const sessions = await memoryDatabaseService.listSessions(filters);
     
     // Apply pagination
     const paginatedSessions = sessions.slice(offset, offset + parseInt(limit));
@@ -88,7 +88,7 @@ export const getReportHistory = async (req, res) => {
     if (sessionId) filters.sessionId = sessionId;
     if (patientName) filters.patientName = patientName;
 
-    const reports = await databaseService.listReports(filters);
+    const reports = await memoryDatabaseService.listReports(filters);
     
     // Apply pagination
     const paginatedReports = reports.slice(offset, offset + parseInt(limit));
@@ -122,11 +122,11 @@ export const getEmotionTrends = async (req, res) => {
     if (startDate) filters.startDate = startDate;
     if (endDate) filters.endDate = endDate;
 
-    const sessions = await databaseService.listSessions(filters);
+    const sessions = await memoryDatabaseService.listSessions(filters);
     const emotionData = [];
 
     for (const session of sessions.slice(0, parseInt(limit))) {
-      const sessionData = await databaseService.getSession(session.id);
+      const sessionData = await memoryDatabaseService.getSession(session.id);
       if (sessionData?.emotionHistory) {
         sessionData.emotionHistory.forEach(emotion => {
           emotionData.push({
@@ -168,11 +168,11 @@ export const getMotionPatterns = async (req, res) => {
     if (startDate) filters.startDate = startDate;
     if (endDate) filters.endDate = endDate;
 
-    const sessions = await databaseService.listSessions(filters);
+    const sessions = await memoryDatabaseService.listSessions(filters);
     const motionData = [];
 
     for (const session of sessions.slice(0, parseInt(limit))) {
-      const sessionData = await databaseService.getSession(session.id);
+      const sessionData = await memoryDatabaseService.getSession(session.id);
       if (sessionData?.motionHistory) {
         sessionData.motionHistory.forEach(motion => {
           motionData.push({

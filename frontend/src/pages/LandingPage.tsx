@@ -8,6 +8,10 @@ const LandingPage: React.FC = () => {
     navigate('/chat');
   };
 
+  const handleTestGesture = () => {
+    navigate('/test-gesture');
+  };
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -112,35 +116,66 @@ const LandingPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Start Button */}
-        <button
-          onClick={handleStartScreening}
-          style={{
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            color: 'white',
-            border: 'none',
-            borderRadius: 50,
-            padding: '16px 40px',
-            fontSize: '1.1rem',
-            fontWeight: 'bold',
-            cursor: 'pointer',
-            boxShadow: '0 8px 16px rgba(102, 126, 234, 0.3)',
-            transition: 'all 0.3s ease',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 12
-          }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 12px 24px rgba(102, 126, 234, 0.4)';
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 8px 16px rgba(102, 126, 234, 0.3)';
-          }}
-        >
-          🚀 Start Screening
-        </button>
+        {/* Action Buttons */}
+        <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <button
+            onClick={handleStartScreening}
+            style={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              border: 'none',
+              borderRadius: 50,
+              padding: '16px 40px',
+              fontSize: '1.1rem',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              boxShadow: '0 8px 16px rgba(102, 126, 234, 0.3)',
+              transition: 'all 0.3s ease',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 12
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 12px 24px rgba(102, 126, 234, 0.4)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 8px 16px rgba(102, 126, 234, 0.3)';
+            }}
+          >
+            🚀 Start Screening
+          </button>
+
+          <button
+            onClick={handleTestGesture}
+            style={{
+              background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)',
+              color: 'white',
+              border: 'none',
+              borderRadius: 50,
+              padding: '16px 32px',
+              fontSize: '1rem',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              boxShadow: '0 8px 16px rgba(40, 167, 69, 0.3)',
+              transition: 'all 0.3s ease',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 12
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 12px 24px rgba(40, 167, 69, 0.4)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 8px 16px rgba(40, 167, 69, 0.3)';
+            }}
+          >
+            🧪 Test Gesture Analysis
+          </button>
+        </div>
 
         {/* Disclaimer */}
         <div style={{

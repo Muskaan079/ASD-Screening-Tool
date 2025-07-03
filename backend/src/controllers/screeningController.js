@@ -4,7 +4,7 @@ import {
   analyzeResponse,
   generateClinicalReport
 } from '../services/screeningService.js';
-import databaseService from '../services/databaseService.js';
+import memoryDatabaseService from '../services/memoryDatabaseService.js';
 
 export const startScreening = async (req, res) => {
   try {
@@ -18,7 +18,7 @@ export const startScreening = async (req, res) => {
     }
 
     const session = await createScreeningSession(patientInfo);
-    await databaseService.createSession(session.id, session.patientInfo);
+    await memoryDatabaseService.createSession(session.id, session.patientInfo);
 
     res.status(201).json({
       success: true,
@@ -50,7 +50,7 @@ export const getNextQuestion = async (req, res) => {
       });
     }
 
-    const session = await databaseService.getSession(sessionId);
+    const session = await memoryDatabaseService.getSession(sessionId);
     if (!session) {
       return res.status(404).json({
         error: 'Screening session not found'
@@ -73,7 +73,7 @@ export const getNextQuestion = async (req, res) => {
     // Update session
     session.currentQuestion = nextQuestion;
     session.lastUpdated = new Date().toISOString();
-    await databaseService.updateSession(sessionId, session);
+    await memoryDatabaseService.updateSession(sessionId, session);
 
     res.json({
       success: true,
@@ -112,7 +112,7 @@ export const submitAnswer = async (req, res) => {
       });
     }
 
-    const session = await databaseService.getSession(sessionId);
+    const session = await memoryDatabaseService.getSession(sessionId);
     if (!session) {
       return res.status(404).json({
         error: 'Screening session not found'
@@ -146,7 +146,7 @@ export const submitAnswer = async (req, res) => {
 
     session.responses.push(response);
     session.lastUpdated = new Date().toISOString();
-    await databaseService.updateSession(sessionId, session);
+    await memoryDatabaseService.updateSession(sessionId, session);
 
     res.json({
       success: true,
@@ -176,7 +176,7 @@ export const updateEmotionData = async (req, res) => {
       });
     }
 
-    const session = await databaseService.getSession(sessionId);
+    const session = await memoryDatabaseService.getSession(sessionId);
     if (!session) {
       return res.status(404).json({
         error: 'Screening session not found'
@@ -198,7 +198,7 @@ export const updateEmotionData = async (req, res) => {
       session.emotionHistory = session.emotionHistory.slice(-100);
     }
 
-    await databaseService.updateSession(sessionId, session);
+    await memoryDatabaseService.updateSession(sessionId, session);
 
     res.json({
       success: true,
@@ -223,7 +223,7 @@ export const updateMotionData = async (req, res) => {
       });
     }
 
-    const session = await databaseService.getSession(sessionId);
+    const session = await memoryDatabaseService.getSession(sessionId);
     if (!session) {
       return res.status(404).json({
         error: 'Screening session not found'
@@ -245,7 +245,7 @@ export const updateMotionData = async (req, res) => {
       session.motionHistory = session.motionHistory.slice(-100);
     }
 
-    await databaseService.updateSession(sessionId, session);
+    await memoryDatabaseService.updateSession(sessionId, session);
 
     res.json({
       success: true,
@@ -264,7 +264,7 @@ export const getScreeningStatus = async (req, res) => {
   try {
     const { sessionId } = req.params;
     
-    const session = await databaseService.getSession(sessionId);
+    const session = await memoryDatabaseService.getSession(sessionId);
     if (!session) {
       return res.status(404).json({
         error: 'Screening session not found'
@@ -306,7 +306,7 @@ export const generateReport = async (req, res) => {
       });
     }
 
-    const session = await databaseService.getSession(sessionId);
+    const session = await memoryDatabaseService.getSession(sessionId);
     if (!session) {
       return res.status(404).json({
         error: 'Screening session not found'
@@ -320,7 +320,7 @@ export const generateReport = async (req, res) => {
     session.status = 'completed';
     session.endTime = new Date().toISOString();
     session.report = report;
-    await databaseService.updateSession(sessionId, session);
+    await memoryDatabaseService.updateSession(sessionId, session);
 
     res.json({
       success: true,
@@ -340,7 +340,7 @@ export const endScreening = async (req, res) => {
   try {
     const { sessionId } = req.params;
     
-    const session = await databaseService.getSession(sessionId);
+    const session = await memoryDatabaseService.getSession(sessionId);
     if (!session) {
       return res.status(404).json({
         error: 'Screening session not found'
@@ -350,7 +350,7 @@ export const endScreening = async (req, res) => {
     // Update session status
     session.status = 'ended';
     session.endTime = new Date().toISOString();
-    await databaseService.updateSession(sessionId, session);
+    await memoryDatabaseService.updateSession(sessionId, session);
 
     res.json({
       success: true,

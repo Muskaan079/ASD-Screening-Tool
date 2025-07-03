@@ -1,4 +1,4 @@
-import databaseService from './databaseService.js';
+import memoryDatabaseService from './memoryDatabaseService.js';
 
 class SessionCleanupService {
   constructor() {
@@ -40,7 +40,7 @@ class SessionCleanupService {
       const cutoffTime = new Date(Date.now() - (this.sessionTimeoutHours * 60 * 60 * 1000));
       
       // Get all active sessions older than the timeout
-      const sessions = await databaseService.listSessions({ status: 'active' });
+      const sessions = await memoryDatabaseService.listSessions({ status: 'active' });
       const staleSessions = sessions.filter(session => 
         new Date(session.startTime) < cutoffTime
       );
@@ -50,7 +50,7 @@ class SessionCleanupService {
       // Mark stale sessions as expired
       for (const session of staleSessions) {
         try {
-          await databaseService.updateSession(session.id, {
+          await memoryDatabaseService.updateSession(session.id, {
             status: 'expired',
             endTime: new Date().toISOString(),
             cleanupReason: 'automatic_expiration'
@@ -86,7 +86,7 @@ class SessionCleanupService {
             archivedAt: new Date().toISOString()
           };
 
-          await databaseService.updateSession(session.id, anonymizedSession);
+          await memoryDatabaseService.updateSession(session.id, anonymizedSession);
           console.log(`Archived session ${session.id}`);
         } catch (error) {
           console.error(`Failed to archive session ${session.id}:`, error);
@@ -108,7 +108,7 @@ class SessionCleanupService {
   // Get cleanup statistics
   async getCleanupStats() {
     try {
-      const sessions = await databaseService.listSessions();
+      const sessions = await memoryDatabaseService.listSessions();
       const now = new Date();
       const cutoffTime = new Date(now.getTime() - (this.sessionTimeoutHours * 60 * 60 * 1000));
 

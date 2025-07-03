@@ -93,7 +93,7 @@ const EnhancedEmotionTracker: React.FC<EnhancedEmotionTrackerProps> = ({
 
     try {
       // Dynamic import for MediaPipe
-      const { Hands } = await import('@mediapipe/hands');
+      const { Hands, HAND_CONNECTIONS } = await import('@mediapipe/hands');
       const { Camera } = await import('@mediapipe/camera_utils');
       const { drawConnectors, drawLandmarks } = await import('@mediapipe/drawing_utils');
 
@@ -160,7 +160,7 @@ const EnhancedEmotionTracker: React.FC<EnhancedEmotionTrackerProps> = ({
             // Draw hand landmarks
             if (results.multiHandLandmarks) {
               results.multiHandLandmarks.forEach((landmarks: any) => {
-                drawConnectors(ctx, landmarks, Hands.HAND_CONNECTIONS, {
+                drawConnectors(ctx, landmarks, HAND_CONNECTIONS, {
                   color: '#00FF00',
                   lineWidth: 2
                 });

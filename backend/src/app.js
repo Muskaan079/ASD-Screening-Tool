@@ -1,9 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { initializeDatabase, testConnection } from './config/database.js';
 import { authenticateAPI, rateLimit } from './middleware/auth.js';
 import sessionCleanupService from './services/sessionCleanupService.js';
+import memoryDatabaseService from './services/memoryDatabaseService.js';
 
 // Load environment variables
 dotenv.config();
@@ -83,14 +83,8 @@ const PORT = process.env.PORT || 3001;
 // Initialize database and start server
 const startServer = async () => {
   try {
-    // Test database connection
-    const dbConnected = await testConnection();
-    if (!dbConnected) {
-      throw new Error('Database connection failed');
-    }
-    
-    // Initialize database tables
-    await initializeDatabase();
+    // Initialize in-memory database
+    await memoryDatabaseService.initializeTables();
     
     // Start session cleanup service in production
     if (process.env.NODE_ENV === 'production') {
@@ -102,7 +96,7 @@ const startServer = async () => {
       console.log(`🚀 Backend server running on port ${PORT}`);
       console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
       console.log(`🔗 CORS Origin: ${process.env.CORS_ORIGIN || 'http://localhost:5173'}`);
-      console.log(`🗄️  Database: PostgreSQL connected to Supabase`);
+      console.log(`🗄️  Database: In-memory (no external dependencies)`);
       console.log(`🔐 Authentication: ${process.env.API_SECRET_KEY ? 'Enabled' : 'Disabled'}`);
     });
   } catch (error) {
