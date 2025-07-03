@@ -317,6 +317,10 @@ const ChatInterface: React.FC = () => {
     navigate('/report');
   };
 
+  const handleStartLiveAnalysis = () => {
+    navigate('/live-analysis');
+  };
+
   // Calculate session duration in minutes
   const sessionDuration = Math.round((new Date().getTime() - sessionStartTime.getTime()) / 60000);
 
@@ -351,6 +355,13 @@ const ChatInterface: React.FC = () => {
                 className="btn btn-secondary"
               >
                 ← Home
+              </button>
+              <button
+                onClick={handleStartLiveAnalysis}
+                className="btn btn-primary"
+                style={{ background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)' }}
+              >
+                🎬 Live Analysis
               </button>
               <button
                 onClick={handleFinishAndGenerateReport}

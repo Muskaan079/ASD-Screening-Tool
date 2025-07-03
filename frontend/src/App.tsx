@@ -4,6 +4,7 @@ import LandingPage from './pages/LandingPage';
 import ChatInterface from './components/ChatInterface';
 import ReportPage from './pages/Report';
 import GestureAnalysisTest from './components/GestureAnalysisTest';
+import LiveAnalysis from './pages/LiveAnalysis';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route path="/chat" element={<ChatInterface />} />
           <Route path="/report" element={<ReportPage />} />
           <Route path="/test-gesture" element={<GestureAnalysisTest />} />
+          <Route path="/live-analysis" element={<LiveAnalysis />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
