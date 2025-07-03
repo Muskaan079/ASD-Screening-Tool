@@ -1,7 +1,5 @@
 import { 
   createScreeningSession, 
-  updateSession, 
-  getSession, 
   generateAdaptiveQuestion,
   analyzeResponse,
   generateClinicalReport
@@ -20,7 +18,7 @@ export const startScreening = async (req, res) => {
     }
 
     const session = await createScreeningSession(patientInfo);
-    await databaseService.createSession(session);
+    await databaseService.createSession(session.id, session.patientInfo);
 
     res.status(201).json({
       success: true,

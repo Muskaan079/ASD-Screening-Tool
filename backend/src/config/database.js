@@ -74,7 +74,8 @@ export const initializeDatabase = async () => {
         motion_data JSONB,
         voice_data JSONB,
         analysis JSONB,
-        timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        UNIQUE(session_id, question_id)
       );
     `);
 

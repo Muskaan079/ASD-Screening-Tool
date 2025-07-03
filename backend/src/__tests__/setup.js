@@ -1,7 +1,7 @@
 // Test setup file
 import { jest } from '@jest/globals';
 import dotenv from 'dotenv';
-import { supabase } from '../config/supabase.js';
+import databaseService from '../services/databaseService.js';
 
 dotenv.config();
 
@@ -58,7 +58,7 @@ global.testUtils = {
 // Test configuration
 export const TEST_CONFIG = {
   // Use test database or in-memory for tests
-  useTestDatabase: process.env.NODE_ENV === 'test' && process.env.SUPABASE_URL,
+  useTestDatabase: process.env.NODE_ENV === 'test' && process.env.DATABASE_URL,
   testTimeout: 10000
 };
 
@@ -67,13 +67,8 @@ export const cleanupTestData = async () => {
   if (!TEST_CONFIG.useTestDatabase) return;
 
   try {
-    // Delete test data in reverse order of dependencies
-    await supabase.from('clinical_reports').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    await supabase.from('motion_history').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    await supabase.from('emotion_history').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    await supabase.from('session_responses').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    await supabase.from('screening_sessions').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    await supabase.from('users').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    // Clean up old sessions (this will cascade delete related data)
+    await databaseService.cleanupExpiredSessions();
   } catch (error) {
     console.warn('Test cleanup warning:', error.message);
   }
@@ -86,33 +81,15 @@ export const createTestSession = async (sessionData = {}) => {
       name: 'Test Patient',
       age: 25,
       gender: 'other'
-    },
-    startTime: new Date().toISOString(),
-    status: 'active',
-    totalQuestions: 20,
-    adaptiveData: {
-      difficultyLevel: 1,
-      categoryFocus: 'social'
     }
   };
 
   const finalData = { ...defaultData, ...sessionData };
 
   if (TEST_CONFIG.useTestDatabase) {
-    const { data, error } = await supabase
-      .from('screening_sessions')
-      .insert({
-        patient_info: finalData.patientInfo,
-        start_time: finalData.startTime,
-        status: finalData.status,
-        total_questions: finalData.totalQuestions,
-        adaptive_data: finalData.adaptiveData
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
+    const sessionId = 'test-session-' + Date.now();
+    await databaseService.createSession(sessionId, finalData.patientInfo);
+    return await databaseService.getSession(sessionId);
   } else {
     // Fallback to in-memory for tests without database
     return {
@@ -127,19 +104,7 @@ export const createTestSession = async (sessionData = {}) => {
 // Get test session
 export const getTestSession = async (sessionId) => {
   if (TEST_CONFIG.useTestDatabase) {
-    const { data, error } = await supabase
-      .from('screening_sessions')
-      .select(`
-        *,
-        session_responses (*),
-        emotion_history (*),
-        motion_history (*)
-      `)
-      .eq('id', sessionId)
-      .single();
-
-    if (error) return null;
-    return data;
+    return await databaseService.getSession(sessionId);
   } else {
     // Fallback for in-memory tests
     return null;
@@ -149,7 +114,7 @@ export const getTestSession = async (sessionId) => {
 // Global test setup
 beforeAll(async () => {
   if (TEST_CONFIG.useTestDatabase) {
-    console.log('🧪 Using Supabase test database');
+    console.log('🧪 Using PostgreSQL test database');
     await cleanupTestData();
   } else {
     console.log('🧪 Using in-memory test storage');

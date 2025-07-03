@@ -85,70 +85,8 @@ REACT_APP_API_URL=https://asd-screening-backend.onrender.com/api
 
 ### **1. Test Database Connection**
 ```bash
-npm run test-db
+node test-db-connection.js
 ```
 
 ### **2. Test API Endpoints**
-```bash
-# Health check (should work)
-curl https://asd-screening-backend.onrender.com/api/health
-
-# Protected endpoint (should fail without API key)
-curl https://asd-screening-backend.onrender.com/api/analytics/statistics
-
-# Protected endpoint (should work with API key)
-curl -H "x-api-key: your-api-key" https://asd-screening-backend.onrender.com/api/analytics/statistics
 ```
-
-### **3. Test Frontend Connection**
-Visit: https://asd-screening-tool.vercel.app
-
-## 🚨 **Troubleshooting**
-
-### **Connection Issues**
-1. **Check password** - Ensure your Supabase password is correct
-2. **Check IP restrictions** - Make sure your IP is allowed in Supabase
-3. **Check SSL** - Production requires SSL, development doesn't
-
-### **Authentication Issues**
-1. **Check API keys** - Ensure both Render and Vercel have the same API key
-2. **Check headers** - Frontend must send `x-api-key` header
-3. **Check CORS** - Ensure CORS origin matches your Vercel domain
-
-### **Database Issues**
-1. **Check tables** - Run `npm run test-db` to verify table creation
-2. **Check permissions** - Ensure your Supabase user has proper permissions
-3. **Check connection pool** - Monitor for connection timeouts
-
-## 📊 **Monitoring**
-
-### **Database Health**
-- Check Render logs for database connection errors
-- Monitor Supabase dashboard for connection activity
-- Use `GET /api/admin/cleanup-stats` to check session cleanup
-
-### **API Health**
-- Monitor rate limiting in Render logs
-- Check authentication failures
-- Monitor session cleanup activity
-
-## 🔐 **Security Notes**
-
-1. **Never commit passwords** to version control
-2. **Rotate API keys** regularly
-3. **Monitor access logs** for suspicious activity
-4. **Use HTTPS** in production
-5. **Keep dependencies updated**
-
-## 📞 **Support**
-
-If you encounter issues:
-
-1. Check the troubleshooting section above
-2. Review Render and Vercel logs
-3. Test with `npm run test-db`
-4. Verify environment variables are set correctly
-
----
-
-**🎉 Your Supabase PostgreSQL connection is now ready!** 
