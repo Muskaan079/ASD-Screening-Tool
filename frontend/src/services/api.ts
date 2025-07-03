@@ -2,7 +2,7 @@
 const API_BASE_URL = 'https://asd-screening-backend.onrender.com/api';
 
 // API Secret Key for authentication
-const API_SECRET_KEY = 'your_secure_api_key_here_change_this_in_production'; // Update this with your actual API key
+const API_SECRET_KEY = 'asd_screening_secure_key_2024';
 
 interface PatientInfo {
   name: string;
