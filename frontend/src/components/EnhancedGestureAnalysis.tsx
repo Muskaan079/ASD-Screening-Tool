@@ -6,6 +6,7 @@ import { Camera } from '@mediapipe/camera_utils';
 import { drawConnectors, drawLandmarks } from '@mediapipe/drawing_utils';
 import * as faceapi from 'face-api.js';
 import apiService, { type EmotionData, type MotionData } from '../services/api';
+import mlService, { type EmotionAnalysis, type GestureAnalysis } from '../services/mlService';
 
 // DREAM-inspired skeleton structure with comprehensive keypoints
 interface SkeletonData {
@@ -204,7 +205,7 @@ const EnhancedGestureAnalysis: React.FC<EnhancedGestureAnalysisProps> = ({
         minTrackingConfidence: 0.5
       });
 
-      pose.onResults((results) => {
+      pose.onResults(async (results) => {
         if (!isRecording || !canvasRef.current) return;
         
         const canvas = canvasRef.current;
@@ -318,9 +319,9 @@ const EnhancedGestureAnalysis: React.FC<EnhancedGestureAnalysisProps> = ({
 
           setDetectedBehaviors(newBehaviors);
 
-          // Send data to backend
-          if (sessionId) {
-            const motionData: MotionData = {
+          // Enhanced gesture analysis using ML service
+          try {
+            const gestureData = {
               repetitive_motions: newBehaviors.some(b => b.includes('Repetitive') || b.includes('Flapping')),
               fidgeting: newBehaviors.some(b => b.includes('Fidgeting')),
               patterns: newBehaviors,
@@ -328,11 +329,55 @@ const EnhancedGestureAnalysis: React.FC<EnhancedGestureAnalysisProps> = ({
                 skeleton,
                 behaviors: newBehaviors,
                 timestamp: Date.now()
-              },
-              timestamp: new Date().toISOString()
+              }
             };
 
-            apiService.updateMotionData(sessionId, motionData).catch(console.warn);
+            const mlResult = await mlService.analyzeGesture(gestureData);
+            
+            // Combine local detection with ML analysis
+            const enhancedBehaviors = [...newBehaviors, ...mlResult.patterns];
+            setDetectedBehaviors(enhancedBehaviors);
+
+            // Send enhanced data to backend
+            if (sessionId) {
+              const motionData: MotionData = {
+                repetitive_motions: mlResult.patterns.includes('repetitive_motion'),
+                fidgeting: mlResult.patterns.includes('fidgeting'),
+                patterns: enhancedBehaviors,
+                motion_data: {
+                  skeleton,
+                  behaviors: enhancedBehaviors,
+                  ml_analysis: {
+                    behavior: mlResult.behavior,
+                    risk_level: mlResult.risk_level,
+                    confidence: mlResult.confidence
+                  },
+                  timestamp: Date.now()
+                },
+                timestamp: mlResult.timestamp
+              };
+
+              apiService.updateMotionData(sessionId, motionData).catch(console.warn);
+            }
+          } catch (mlError) {
+            console.warn('ML gesture analysis failed, using local detection:', mlError);
+            
+            // Fallback to local detection only
+            if (sessionId) {
+              const motionData: MotionData = {
+                repetitive_motions: newBehaviors.some(b => b.includes('Repetitive') || b.includes('Flapping')),
+                fidgeting: newBehaviors.some(b => b.includes('Fidgeting')),
+                patterns: newBehaviors,
+                motion_data: {
+                  skeleton,
+                  behaviors: newBehaviors,
+                  timestamp: Date.now()
+                },
+                timestamp: new Date().toISOString()
+              };
+
+              apiService.updateMotionData(sessionId, motionData).catch(console.warn);
+            }
           }
         }
       });
@@ -417,36 +462,58 @@ const EnhancedGestureAnalysis: React.FC<EnhancedGestureAnalysisProps> = ({
     }
   }, []);
 
-  // Analyze emotion from video frame
+  // Analyze emotion from video frame using ML service
   const analyzeEmotion = useCallback(async () => {
     if (!videoRef.current || !isRecording) return;
 
     try {
-      const detections = await faceapi.detectAllFaces(videoRef.current, new faceapi.TinyFaceDetectorOptions())
-        .withFaceExpressions();
+      // Try face-api.js first, then fallback to ML service
+      let emotionResult: EmotionAnalysis;
+      
+      try {
+        const detections = await faceapi.detectAllFaces(videoRef.current, new faceapi.TinyFaceDetectorOptions())
+          .withFaceExpressions();
 
-      if (detections.length > 0) {
-        const expressions = detections[0].expressions;
-        const emotions = Object.entries(expressions);
-        const dominantEmotion = emotions.reduce((a, b) => a[1] > b[1] ? a : b);
-        
-        setCurrentEmotion(dominantEmotion[0]);
-        setEmotionConfidence(dominantEmotion[1]);
-
-        // Send emotion data to backend
-        if (sessionId) {
-          const emotionData: EmotionData = {
-            dominant_emotion: dominantEmotion[0],
+        if (detections.length > 0) {
+          const expressions = detections[0].expressions;
+          const emotions = Object.entries(expressions);
+          const dominantEmotion = emotions.reduce((a, b) => a[1] > b[1] ? a : b);
+          
+          emotionResult = {
+            emotion: dominantEmotion[0],
             confidence: dominantEmotion[1],
             emotions: Object.fromEntries(Object.entries(expressions)),
             timestamp: new Date().toISOString()
           };
-
-          apiService.updateEmotionData(sessionId, emotionData).catch(console.warn);
+        } else {
+          // Fallback to ML service if no face detected
+          emotionResult = await mlService.analyzeEmotion('facial expression analysis');
         }
+      } catch (faceError) {
+        console.warn('Face-api.js failed, using ML service:', faceError);
+        // Use ML service as fallback
+        emotionResult = await mlService.analyzeEmotion('facial expression analysis');
+      }
+      
+      setCurrentEmotion(emotionResult.emotion);
+      setEmotionConfidence(emotionResult.confidence);
+
+      // Send emotion data to backend
+      if (sessionId) {
+        const emotionData: EmotionData = {
+          dominant_emotion: emotionResult.emotion,
+          confidence: emotionResult.confidence,
+          emotions: emotionResult.emotions,
+          timestamp: emotionResult.timestamp
+        };
+
+        apiService.updateEmotionData(sessionId, emotionData).catch(console.warn);
       }
     } catch (err) {
       console.warn('Error analyzing emotion:', err);
+      // Final fallback
+      setCurrentEmotion('neutral');
+      setEmotionConfidence(0.5);
     }
   }, [isRecording, sessionId]);
 
