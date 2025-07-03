@@ -145,6 +145,9 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const eyeTrackingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const emotionAnalysisRef = useRef<boolean>(false);
+  const voiceAnalysisRef = useRef<boolean>(false);
+  const gestureAnalysisRef = useRef<boolean>(false);
   
   const {
     isListening,
@@ -240,9 +243,13 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
     }
   }, []);
 
-  // Real ML emotion analysis
+  // Real ML emotion analysis with performance optimization
   const analyzeEmotion = useCallback(async () => {
     if (!isScreening) return;
+
+    // Add a simple debounce to prevent too many calls
+    if (emotionAnalysisRef.current) return;
+    emotionAnalysisRef.current = true;
 
     try {
       // Use real ML service for emotion analysis
@@ -274,11 +281,20 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
         timestamp: new Date().toISOString()
       };
       setEmotionData(emotionData);
+    } finally {
+      // Reset the flag after a short delay
+      setTimeout(() => {
+        emotionAnalysisRef.current = false;
+      }, 1000);
     }
   }, [isScreening, sessionId]);
 
   const analyzeVoice = useCallback(async () => {
     if (!isScreening) return;
+
+    // Add debounce to prevent too many calls
+    if (voiceAnalysisRef.current) return;
+    voiceAnalysisRef.current = true;
 
     try {
       // Analyze audio if available
@@ -339,12 +355,21 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
         timestamp: new Date().toISOString()
       };
       setVoiceData(voiceData);
+    } finally {
+      // Reset the flag after a delay
+      setTimeout(() => {
+        voiceAnalysisRef.current = false;
+      }, 1500);
     }
   }, [isScreening, transcript, timeRemaining, emotionData, sessionId]);
 
-  // Real ML gesture analysis
+  // Real ML gesture analysis with performance optimization
   const analyzeGesture = useCallback(async () => {
     if (!isScreening) return;
+
+    // Add debounce to prevent too many calls
+    if (gestureAnalysisRef.current) return;
+    gestureAnalysisRef.current = true;
 
     try {
       // Create gesture data for ML analysis
@@ -393,6 +418,11 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
         timestamp: new Date().toISOString()
       };
       setMotionData(motionData);
+    } finally {
+      // Reset the flag after a delay
+      setTimeout(() => {
+        gestureAnalysisRef.current = false;
+      }, 1500);
     }
   }, [isScreening, sessionId]);
 
@@ -511,10 +541,10 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
       await startVideoAnalysis();
       startListening();
       
-      // Start analysis intervals
-      const emotionInterval = setInterval(analyzeEmotion, 2000);
-      const voiceInterval = setInterval(analyzeVoice, 3000);
-      const gestureInterval = setInterval(analyzeGesture, 2500);
+      // Start analysis intervals with longer intervals to prevent performance issues
+      const emotionInterval = setInterval(analyzeEmotion, 4000); // Reduced frequency
+      const voiceInterval = setInterval(analyzeVoice, 5000); // Reduced frequency
+      const gestureInterval = setInterval(analyzeGesture, 4000); // Reduced frequency
       
       // Eye tracking is handled by the EyeTrackingAnalysis component
       
@@ -567,6 +597,11 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
     setIsScreening(false);
     setCurrentPhase('analysis');
     setStatus('Analyzing results...');
+    
+    // Reset analysis refs
+    emotionAnalysisRef.current = false;
+    voiceAnalysisRef.current = false;
+    gestureAnalysisRef.current = false;
     
     if (sessionId && !sessionId.startsWith('local-session-')) {
       try {
