@@ -1,11 +1,12 @@
 import React, { useState, FormEvent, ChangeEvent, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSpeechToText } from '../services/useSpeechToText';
-import { getNextQuestion, ConversationEntry } from '../services/adaptiveEngine';
+import { getNextQuestion, ConversationEntry, RepetitiveMotionData } from '../services/adaptiveEngine';
 import { EmotionLogEntry } from '../services/reportGenerator';
 import { ReasoningFactor } from './ReasoningVisualizer';
 import FaceEmotionTracker from './FaceEmotionTracker';
 import ReasoningVisualizer from './ReasoningVisualizer';
+import { useRepetitiveMotionDetector } from '../hooks/useRepetitiveMotionDetector';
 
 interface Message {
   sender: 'system' | 'user';
@@ -37,6 +38,19 @@ const ChatInterface: React.FC = () => {
   const [emotionLog, setEmotionLog] = useState<EmotionLogEntry[]>([]);
   const [sessionStartTime] = useState<Date>(new Date());
   const navigate = useNavigate();
+
+  // Initialize repetitive motion detector
+  const {
+    addWristData,
+    analysis: repetitiveMotionAnalysis,
+    clearHistory,
+    hasData: hasRepetitiveMotionData,
+    dataCount: repetitiveMotionDataCount,
+  } = useRepetitiveMotionDetector({
+    windowSize: 100,
+    analysisInterval: 1000,
+    frameRate: 25.1,
+  });
 
   const {
     isListening,
@@ -122,6 +136,16 @@ const ChatInterface: React.FC = () => {
     setEmotionLog(prev => [...prev, emotionEntry]);
   };
 
+  // Handle wrist data from MediaPipe
+  const handleWristDataDetected = (handData: any) => {
+    addWristData(handData);
+  };
+
+  // Handle repetitive motion analysis
+  const handleRepetitiveMotionDetected = (analysis: any) => {
+    console.log('Repetitive motion detected:', analysis);
+  };
+
   // Generate next question using adaptive engine
   const generateNextQuestion = async (userResponse: string) => {
     try {
@@ -153,10 +177,21 @@ const ChatInterface: React.FC = () => {
         domain: messages[messages.length - 2]?.domain,
       });
 
+      // Prepare repetitive motion data for adaptive engine
+      const repetitiveMotionData: RepetitiveMotionData | undefined = 
+        repetitiveMotionAnalysis.classification !== 'NONE' ? {
+          score: repetitiveMotionAnalysis.score,
+          classification: repetitiveMotionAnalysis.classification,
+          description: repetitiveMotionAnalysis.description,
+          dominantFrequencies: repetitiveMotionAnalysis.dominantFrequencies,
+          recommendations: repetitiveMotionAnalysis.recommendations
+        } : undefined;
+
       const nextQuestion = await getNextQuestion({
         history: conversationHistory,
         emotion: currentEmotion,
         emotionConfidence: emotionConfidence,
+        repetitiveMotion: repetitiveMotionData
       });
 
       // Generate mock reasoning factors
@@ -255,16 +290,28 @@ const ChatInterface: React.FC = () => {
     // Convert messages to conversation history for report
     const conversationHistory = getConversationHistory();
     
+    // Prepare repetitive motion data for report
+    const repetitiveMotionData = hasRepetitiveMotionData ? {
+      classification: repetitiveMotionAnalysis.classification,
+      score: repetitiveMotionAnalysis.score,
+      description: repetitiveMotionAnalysis.description,
+      dominantFrequencies: repetitiveMotionAnalysis.dominantFrequencies,
+      recommendations: repetitiveMotionAnalysis.recommendations,
+      dataPoints: repetitiveMotionDataCount
+    } : undefined;
+    
     console.log('Storing data for report:', {
       conversationHistory,
       emotionLog,
-      sessionDuration
+      sessionDuration,
+      repetitiveMotion: repetitiveMotionData
     });
     
     // Store data in sessionStorage for the report page
     sessionStorage.setItem('screeningHistory', JSON.stringify(conversationHistory));
     sessionStorage.setItem('screeningEmotionLog', JSON.stringify(emotionLog));
     sessionStorage.setItem('screeningDuration', sessionDuration.toString());
+    sessionStorage.setItem('screeningRepetitiveMotion', JSON.stringify(repetitiveMotionData));
     
     console.log('Data stored, navigating to report...');
     navigate('/report');
@@ -411,17 +458,25 @@ const ChatInterface: React.FC = () => {
           <div className="emotion-tracker-container">
             <FaceEmotionTracker 
               onEmotionDetected={handleEmotionDetected}
+              onWristDataDetected={handleWristDataDetected}
+              onRepetitiveMotionDetected={handleRepetitiveMotionDetected}
               width={350}
               height={250}
+              enableHandTracking={true}
             />
           </div>
           <div className="status-info">
             <div style={{ fontWeight: 'bold', marginBottom: 12 }}>Current Status:</div>
             <div style={{ marginBottom: 8 }}>Emotion: <strong>{currentEmotion}</strong></div>
             <div style={{ marginBottom: 8 }}>Confidence: <strong>{(emotionConfidence * 100).toFixed(1)}%</strong></div>
+            <div style={{ marginBottom: 8 }}>Hand Tracking: <strong>{hasRepetitiveMotionData ? '✅ Active' : '⏳ Collecting data...'}</strong></div>
+            <div style={{ marginBottom: 8 }}>Wrist Data Points: <strong>{repetitiveMotionDataCount}</strong></div>
+            {repetitiveMotionAnalysis.classification !== 'NONE' && (
+              <div style={{ marginBottom: 8 }}>Repetitive Motion: <strong>{repetitiveMotionAnalysis.classification} (Score: {repetitiveMotionAnalysis.score.toFixed(3)})</strong></div>
+            )}
             <div style={{ marginBottom: 8 }}>Session Duration: <strong>{sessionDuration} min</strong></div>
             <div style={{ marginTop: 12, fontSize: 12, color: '#666', lineHeight: '1.4' }}>
-              Emotions are used to adapt the screening questions and generate clinical reports.
+              Multi-modal analysis combines facial emotions and hand movements for comprehensive assessment.
             </div>
           </div>
         </div>

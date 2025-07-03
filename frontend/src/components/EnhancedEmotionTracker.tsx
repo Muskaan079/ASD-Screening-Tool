@@ -1,9 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as faceapi from 'face-api.js';
-import { Hands } from '@mediapipe/hands';
-import { Camera } from '@mediapipe/camera_utils';
-import { drawConnectors, drawLandmarks } from '@mediapipe/drawing_utils';
-import { HAND_CONNECTIONS } from '@mediapipe/hands';
 
 interface WristPosition {
   x: number;
@@ -18,7 +14,7 @@ interface HandPoseData {
   timestamp: number;
 }
 
-interface FaceEmotionTrackerProps {
+interface EnhancedEmotionTrackerProps {
   onEmotionDetected?: (emotion: string, confidence: number) => void;
   onWristDataDetected?: (handData: HandPoseData) => void;
   onRepetitiveMotionDetected?: (analysis: any) => void;
@@ -27,7 +23,7 @@ interface FaceEmotionTrackerProps {
   enableHandTracking?: boolean;
 }
 
-const FaceEmotionTracker: React.FC<FaceEmotionTrackerProps> = ({
+const EnhancedEmotionTracker: React.FC<EnhancedEmotionTrackerProps> = ({
   onEmotionDetected,
   onWristDataDetected,
   onRepetitiveMotionDetected,
@@ -44,10 +40,11 @@ const FaceEmotionTracker: React.FC<FaceEmotionTrackerProps> = ({
   const [isStreamActive, setIsStreamActive] = useState(false);
   const [handTrackingActive, setHandTrackingActive] = useState(false);
   const [wristDataHistory, setWristDataHistory] = useState<HandPoseData[]>([]);
+  const [repetitiveMotionScore, setRepetitiveMotionScore] = useState<number>(0);
 
   // MediaPipe Hands setup
-  const handsRef = useRef<Hands | null>(null);
-  const cameraRef = useRef<Camera | null>(null);
+  const handsRef = useRef<any>(null);
+  const cameraRef = useRef<any>(null);
 
   // Load face-api.js models
   const loadModels = useCallback(async () => {
@@ -92,9 +89,14 @@ const FaceEmotionTracker: React.FC<FaceEmotionTrackerProps> = ({
 
   // Load MediaPipe Hands
   const loadHandTracking = useCallback(async () => {
-    if (!enableHandTracking || !videoRef.current) return;
+    if (!enableHandTracking) return;
 
     try {
+      // Dynamic import for MediaPipe
+      const { Hands } = await import('@mediapipe/hands');
+      const { Camera } = await import('@mediapipe/camera_utils');
+      const { drawConnectors, drawLandmarks } = await import('@mediapipe/drawing_utils');
+
       // Initialize MediaPipe Hands
       handsRef.current = new Hands({
         locateFile: (file: string) => {
@@ -153,12 +155,12 @@ const FaceEmotionTracker: React.FC<FaceEmotionTrackerProps> = ({
           const canvas = canvasRef.current;
           const ctx = canvas.getContext('2d');
           if (ctx) {
-            // Don't clear canvas here as face detection will draw on it too
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             
             // Draw hand landmarks
             if (results.multiHandLandmarks) {
               results.multiHandLandmarks.forEach((landmarks: any) => {
-                                 drawConnectors(ctx, landmarks, HAND_CONNECTIONS, {
+                drawConnectors(ctx, landmarks, Hands.HAND_CONNECTIONS, {
                   color: '#00FF00',
                   lineWidth: 2
                 });
@@ -174,7 +176,7 @@ const FaceEmotionTracker: React.FC<FaceEmotionTrackerProps> = ({
       });
 
       // Initialize camera
-      cameraRef.current = new Camera(videoRef.current, {
+      cameraRef.current = new Camera(videoRef.current!, {
         onFrame: async () => {
           if (handsRef.current && videoRef.current) {
             await handsRef.current.send({ image: videoRef.current });
@@ -249,7 +251,7 @@ const FaceEmotionTracker: React.FC<FaceEmotionTrackerProps> = ({
         const resizedDetections = faceapi.resizeResults(detections, displaySize);
         const ctx = canvas.getContext('2d');
         if (ctx) {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          // Don't clear canvas here as hand tracking will draw on it
           faceapi.draw.drawDetections(canvas, resizedDetections);
           faceapi.draw.drawFaceExpressions(canvas, resizedDetections);
         }
@@ -286,6 +288,7 @@ const FaceEmotionTracker: React.FC<FaceEmotionTrackerProps> = ({
 
     // Normalize score (0-1)
     const score = Math.min(avgVariance / 1000, 1.0);
+    setRepetitiveMotionScore(score);
 
     // Emit analysis if callback provided
     if (onRepetitiveMotionDetected) {
@@ -445,11 +448,11 @@ const FaceEmotionTracker: React.FC<FaceEmotionTrackerProps> = ({
           </div>
         )}
         <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>
-          Wrist Data Points: {wristDataHistory.length}
+          Repetitive Motion Score: {(repetitiveMotionScore * 100).toFixed(1)}%
         </div>
       </div>
     </div>
   );
 };
 
-export default FaceEmotionTracker; 
+export default EnhancedEmotionTracker; 

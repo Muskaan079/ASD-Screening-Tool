@@ -9,10 +9,19 @@ export interface ConversationEntry {
   domain?: string;
 }
 
+export interface RepetitiveMotionData {
+  score: number;
+  classification: 'HIGH' | 'MEDIUM' | 'LOW' | 'NONE';
+  description: string;
+  dominantFrequencies: number[];
+  recommendations: string[];
+}
+
 export interface AdaptiveQuestionRequest {
   history: ConversationEntry[];
   emotion: string;
   emotionConfidence?: number;
+  repetitiveMotion?: RepetitiveMotionData;
 }
 
 export interface AdaptiveQuestionResponse {
@@ -20,6 +29,7 @@ export interface AdaptiveQuestionResponse {
   reasoning: string;
   domain: string;
   severity: 'mild' | 'moderate' | 'severe';
+  repetitiveMotionContext?: string;
 }
 
 // Mock OpenAI API call - replace with actual implementation
@@ -71,12 +81,22 @@ const callOpenAI = async (_prompt: string): Promise<string> => {
 
 export const getNextQuestion = async (request: AdaptiveQuestionRequest): Promise<AdaptiveQuestionResponse> => {
   try {
-    const { history, emotion, emotionConfidence } = request;
+    const { history, emotion, emotionConfidence, repetitiveMotion } = request;
 
     // Build conversation history for the prompt
     const conversationText = history.map(h => 
       `Q: ${h.question}\nA: ${h.response}${h.emotion ? ` (Emotion: ${h.emotion}, Confidence: ${(h.emotionConfidence || 0 * 100).toFixed(1)}%)` : ''}`
     ).join('\n\n');
+
+    // Create repetitive motion context
+    const repetitiveMotionContext = repetitiveMotion ? `
+Repetitive Motion Analysis:
+- Classification: ${repetitiveMotion.classification}
+- Score: ${repetitiveMotion.score.toFixed(3)}
+- Description: ${repetitiveMotion.description}
+- Dominant Frequencies: ${repetitiveMotion.dominantFrequencies.map(f => f.toFixed(2)).join(', ')} Hz
+- Recommendations: ${repetitiveMotion.recommendations.join('; ')}
+` : '';
 
     // Create the prompt for GPT-4
     const prompt = `You are an expert clinical psychologist conducting an adaptive ASD screening assessment. 
@@ -85,22 +105,29 @@ Given the conversation history:
 ${conversationText}
 
 And the user's current detected emotion: "${emotion}" (confidence: ${(emotionConfidence || 0 * 100).toFixed(1)}%)
+${repetitiveMotionContext}
 
 Please provide the next most appropriate ASD screening question according to DSM-5 criteria. Consider:
 1. The user's emotional state and how it might affect their responses
 2. Areas that haven't been explored yet based on the conversation
 3. Follow-up questions based on previous responses
 4. DSM-5 diagnostic criteria for Autism Spectrum Disorder
+5. Repetitive motion patterns detected (if any) and their clinical significance
 
 Return your response as a JSON object with this exact structure:
 {
   "question": "The next screening question",
   "reasoning": "Brief explanation of why this question is appropriate",
   "domain": "The DSM-5 domain this question addresses",
-  "severity": "mild|moderate|severe"
+  "severity": "mild|moderate|severe",
+  "repetitiveMotionContext": "Brief note about how repetitive motion analysis influenced this question (if applicable)"
 }
 
-Focus on being empathetic and adaptive to the user's emotional state.`;
+Focus on being empathetic and adaptive to the user's emotional state. If repetitive motion is detected, consider asking about:
+- Hand flapping or other repetitive behaviors
+- Sensory seeking behaviors
+- Self-stimulatory behaviors
+- Motor coordination challenges`;
 
     const response = await callOpenAI(prompt);
     
@@ -117,6 +144,7 @@ Focus on being empathetic and adaptive to the user's emotional state.`;
         reasoning: parsedResponse.reasoning,
         domain: parsedResponse.domain,
         severity: parsedResponse.severity,
+        repetitiveMotionContext: parsedResponse.repetitiveMotionContext || undefined,
       };
     } catch (parseError) {
       console.error('Failed to parse AI response:', parseError);
@@ -126,12 +154,12 @@ Focus on being empathetic and adaptive to the user's emotional state.`;
 
   } catch (error) {
     console.error('Error getting next question:', error);
-    return getFallbackQuestion(request.history, request.emotion);
+    return getFallbackQuestion(request.history, request.emotion, request.repetitiveMotion);
   }
 };
 
 // Fallback function that selects questions from our predefined set
-const getFallbackQuestion = (history: ConversationEntry[], emotion: string): AdaptiveQuestionResponse => {
+const getFallbackQuestion = (history: ConversationEntry[], emotion: string, repetitiveMotion?: RepetitiveMotionData): AdaptiveQuestionResponse => {
   const usedQuestions = new Set(history.map(h => h.question));
   const availableQuestions = questions.filter(q => !usedQuestions.has(q.text));
   
@@ -145,10 +173,27 @@ const getFallbackQuestion = (history: ConversationEntry[], emotion: string): Ada
     };
   }
 
-  // Select question based on emotion and history
+  // Select question based on emotion, history, and repetitive motion
   let selectedQuestion: Question;
+  let repetitiveMotionContext: string | undefined;
   
-  if (emotion === 'anxious' || emotion === 'fearful') {
+  // Prioritize repetitive motion if detected
+  if (repetitiveMotion && repetitiveMotion.classification !== 'NONE') {
+    const repetitiveQuestions = availableQuestions.filter(q => 
+      q.domain === 'Restricted Behaviors' || 
+      q.domain === 'Sensory Sensitivity' ||
+      q.text.toLowerCase().includes('repetitive') ||
+      q.text.toLowerCase().includes('hand') ||
+      q.text.toLowerCase().includes('movement')
+    );
+    
+    if (repetitiveQuestions.length > 0) {
+      selectedQuestion = repetitiveQuestions[0];
+      repetitiveMotionContext = `Question selected based on detected ${repetitiveMotion.classification.toLowerCase()} repetitive motion patterns`;
+    } else {
+      selectedQuestion = availableQuestions[0];
+    }
+  } else if (emotion === 'anxious' || emotion === 'fearful') {
     // Focus on social communication for anxious users
     selectedQuestion = availableQuestions.find(q => q.domain === 'Social Communication') || availableQuestions[0];
   } else if (emotion === 'sad' || emotion === 'angry') {
@@ -164,6 +209,7 @@ const getFallbackQuestion = (history: ConversationEntry[], emotion: string): Ada
     reasoning: `Selected from predefined questions based on emotion: ${emotion}`,
     domain: selectedQuestion.domain,
     severity: selectedQuestion.severity,
+    repetitiveMotionContext,
   };
 };
 

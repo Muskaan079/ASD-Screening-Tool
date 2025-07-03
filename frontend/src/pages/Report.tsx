@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ConversationEntry } from '../services/adaptiveEngine';
+import { RepetitiveMotionSummary } from '../services/reportGenerator';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import MedicalVisualizations from '../components/MedicalVisualizations';
 
@@ -15,6 +16,7 @@ export interface ClinicalReport {
   domainsAddressed: string[];
   keyObservations: string[];
   emotionalStateTrends: string[];
+  repetitiveMotionAnalysis?: string[];
   riskAreas: string[];
   recommendations: string[];
   sessionMetadata: {
@@ -22,6 +24,11 @@ export interface ClinicalReport {
     sessionDuration: number;
     emotionVariability: number;
     primaryEmotions: string[];
+    repetitiveMotionData?: {
+      classification: string;
+      score: number;
+      dataPoints: number;
+    };
   };
 }
 
@@ -29,6 +36,7 @@ interface ReportPageProps {
   history?: ConversationEntry[];
   emotionLog?: EmotionLogEntry[];
   sessionDuration?: number;
+  repetitiveMotion?: RepetitiveMotionSummary;
   onBackToChat?: () => void;
 }
 
@@ -36,6 +44,7 @@ const ReportPage: React.FC<ReportPageProps> = ({
   history: propHistory = [],
   emotionLog: propEmotionLog = [],
   sessionDuration: propSessionDuration = 0,
+  repetitiveMotion: propRepetitiveMotion,
   onBackToChat
 }) => {
   const [report, setReport] = useState<ClinicalReport | null>(null);
@@ -48,23 +57,34 @@ const ReportPage: React.FC<ReportPageProps> = ({
     let historyData: ConversationEntry[] = [];
     let emotionData: EmotionLogEntry[] = [];
     let duration = 0;
+    let repetitiveMotionData: RepetitiveMotionSummary | undefined;
 
     // Try to get data from props first
     if (propHistory.length > 0 || propEmotionLog.length > 0) {
       historyData = propHistory;
       emotionData = propEmotionLog;
       duration = propSessionDuration;
+      repetitiveMotionData = propRepetitiveMotion;
     } else {
       // Try sessionStorage
       try {
         const storedHistory = sessionStorage.getItem('screeningHistory');
         const storedEmotionLog = sessionStorage.getItem('screeningEmotionLog');
         const storedDuration = sessionStorage.getItem('screeningDuration');
+        const storedRepetitiveMotion = sessionStorage.getItem('screeningRepetitiveMotion');
 
         if (storedHistory && storedEmotionLog && storedDuration) {
           historyData = JSON.parse(storedHistory);
           emotionData = JSON.parse(storedEmotionLog);
           duration = parseInt(storedDuration);
+          
+          if (storedRepetitiveMotion) {
+            try {
+              repetitiveMotionData = JSON.parse(storedRepetitiveMotion);
+            } catch (err) {
+              console.warn('Failed to parse repetitive motion data:', err);
+            }
+          }
         } else {
           // No data available
           setError('No screening data found. Please complete a screening session first.');
@@ -77,10 +97,10 @@ const ReportPage: React.FC<ReportPageProps> = ({
     }
 
     // Generate report immediately
-    generateSimpleReport(historyData, emotionData, duration);
+    generateSimpleReport(historyData, emotionData, duration, repetitiveMotionData);
   }, []);
 
-  const generateSimpleReport = async (history: ConversationEntry[], emotionLog: EmotionLogEntry[], sessionDuration: number) => {
+  const generateSimpleReport = async (history: ConversationEntry[], emotionLog: EmotionLogEntry[], sessionDuration: number, repetitiveMotion?: RepetitiveMotionSummary) => {
     setIsGenerating(true);
     setError(null);
 
@@ -92,33 +112,51 @@ const ReportPage: React.FC<ReportPageProps> = ({
       const primaryEmotions = emotions.length > 0 ? [...new Set(emotions)].slice(0, 3) : ['neutral'];
       const domains = [...new Set(history.map(h => h.domain).filter((domain): domain is string => Boolean(domain)))];
 
+      // Prepare repetitive motion analysis
+      const repetitiveMotionAnalysis = repetitiveMotion ? [
+        `Repetitive motion classification: ${repetitiveMotion.classification}`,
+        `Analysis score: ${repetitiveMotion.score.toFixed(3)}`,
+        `Dominant frequencies: ${repetitiveMotion.dominantFrequencies.map(f => f.toFixed(2)).join(', ')} Hz`,
+        `Data points analyzed: ${repetitiveMotion.dataPoints}`,
+        `Clinical recommendations: ${repetitiveMotion.recommendations.join('; ')}`
+      ] : undefined;
+
       const simpleReport: ClinicalReport = {
-        summary: `A screening session was conducted covering ${domains.length > 0 ? domains.join(', ') : 'general assessment'} domains. The participant responded to ${history.length} questions over ${sessionDuration} minutes.`,
+        summary: `A screening session was conducted covering ${domains.length > 0 ? domains.join(', ') : 'general assessment'} domains. The participant responded to ${history.length} questions over ${sessionDuration} minutes.${repetitiveMotion ? ` Motor behavior analysis was also performed.` : ''}`,
         domainsAddressed: domains.length > 0 ? domains : ["General Assessment"],
         keyObservations: [
           `Participant engaged with ${history.length} screening questions`,
           `Session duration: ${sessionDuration} minutes`,
           `Emotional responses were monitored throughout`,
-          `Primary emotions observed: ${primaryEmotions.join(', ')}`
+          `Primary emotions observed: ${primaryEmotions.join(', ')}`,
+          ...(repetitiveMotion ? [`Motor behavior analysis: ${repetitiveMotion.classification} repetitive motion patterns detected`] : [])
         ],
         emotionalStateTrends: [
           `Most frequent emotions: ${primaryEmotions.join(', ')}`,
           `Emotional variability: ${emotionLog.length > 1 ? 'moderate' : 'limited'}`
         ],
+        repetitiveMotionAnalysis,
         riskAreas: [
           "Further clinical evaluation recommended",
-          "Consider comprehensive developmental assessment"
+          "Consider comprehensive developmental assessment",
+          ...(repetitiveMotion && repetitiveMotion.classification !== 'NONE' ? ["Motor behavior patterns warrant attention"] : [])
         ],
         recommendations: [
           "Schedule follow-up with qualified mental health professional",
           "Consider occupational therapy assessment if needed",
-          "Monitor for any behavioral changes"
+          "Monitor for any behavioral changes",
+          ...(repetitiveMotion ? repetitiveMotion.recommendations : [])
         ],
         sessionMetadata: {
           totalQuestions: history.length,
           sessionDuration,
           emotionVariability: emotionLog.length > 1 ? new Set(emotionLog.map(e => e.emotionLabel)).size / emotionLog.length : 0,
           primaryEmotions,
+          repetitiveMotionData: repetitiveMotion ? {
+            classification: repetitiveMotion.classification,
+            score: repetitiveMotion.score,
+            dataPoints: repetitiveMotion.dataPoints,
+          } : undefined,
         },
       };
 
@@ -243,7 +281,10 @@ ${report.keyObservations.map(obs => `- ${obs}`).join('\n')}
 EMOTIONAL STATE TRENDS:
 ${report.emotionalStateTrends.map(trend => `- ${trend}`).join('\n')}
 
-RISK AREAS:
+${report.repetitiveMotionAnalysis ? `MOTOR BEHAVIOR ANALYSIS:
+${report.repetitiveMotionAnalysis.map(analysis => `- ${analysis}`).join('\n')}
+
+` : ''}RISK AREAS:
 ${report.riskAreas.map(risk => `- ${risk}`).join('\n')}
 
 RECOMMENDATIONS:
@@ -254,6 +295,7 @@ SESSION METADATA:
 - Session Duration: ${report.sessionMetadata.sessionDuration} minutes
 - Emotion Variability: ${report.sessionMetadata.emotionVariability.toFixed(2)}
 - Primary Emotions: ${report.sessionMetadata.primaryEmotions.join(', ')}
+${report.sessionMetadata.repetitiveMotionData ? `- Motor Analysis: ${report.sessionMetadata.repetitiveMotionData.classification} (Score: ${report.sessionMetadata.repetitiveMotionData.score.toFixed(3)}, Data Points: ${report.sessionMetadata.repetitiveMotionData.dataPoints})` : ''}
 
 IMPORTANT: This is a screening report only and should not be used for diagnosis. Please consult with qualified healthcare professionals for comprehensive evaluation.`;
 
@@ -982,6 +1024,20 @@ IMPORTANT: This is a screening report only and should not be used for diagnosis.
           </ul>
         </section>
 
+        {/* Repetitive Motion Analysis */}
+        {report.repetitiveMotionAnalysis && (
+          <section style={{ marginBottom: 30 }}>
+            <h2 style={{ color: '#333', borderBottom: '1px solid #eee', paddingBottom: 10 }}>Motor Behavior Analysis</h2>
+            <ul style={{ paddingLeft: 20 }}>
+              {report.repetitiveMotionAnalysis.map((analysis, index) => (
+                <li key={index} style={{ marginBottom: 8, fontSize: 16, lineHeight: 1.5, color: '#444' }}>
+                  {analysis}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         {/* Risk Areas */}
         <section style={{ marginBottom: 30 }}>
           <h2 style={{ color: '#333', borderBottom: '1px solid #eee', paddingBottom: 10 }}>Areas Requiring Attention</h2>
@@ -1027,6 +1083,11 @@ IMPORTANT: This is a screening report only and should not be used for diagnosis.
             <div style={{ color: '#333' }}>
               <strong>Primary Emotions:</strong> {report.sessionMetadata.primaryEmotions.join(', ')}
             </div>
+            {report.sessionMetadata.repetitiveMotionData && (
+              <div style={{ color: '#333' }}>
+                <strong>Motor Analysis:</strong> {report.sessionMetadata.repetitiveMotionData.classification} (Score: {report.sessionMetadata.repetitiveMotionData.score.toFixed(3)}, Data Points: {report.sessionMetadata.repetitiveMotionData.dataPoints})
+              </div>
+            )}
           </div>
         </section>
 

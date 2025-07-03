@@ -6,10 +6,20 @@ export interface EmotionLogEntry {
   confidence: number;
 }
 
+export interface RepetitiveMotionSummary {
+  classification: 'HIGH' | 'MEDIUM' | 'LOW' | 'NONE';
+  score: number;
+  description: string;
+  dominantFrequencies: number[];
+  recommendations: string[];
+  dataPoints: number;
+}
+
 export interface ClinicalReportRequest {
   history: ConversationEntry[];
   emotionLog: EmotionLogEntry[];
   sessionDuration: number; // in minutes
+  repetitiveMotion?: RepetitiveMotionSummary;
 }
 
 export interface ClinicalReport {
@@ -17,6 +27,7 @@ export interface ClinicalReport {
   domainsAddressed: string[];
   keyObservations: string[];
   emotionalStateTrends: string[];
+  repetitiveMotionAnalysis?: string[];
   riskAreas: string[];
   recommendations: string[];
   sessionMetadata: {
@@ -24,6 +35,11 @@ export interface ClinicalReport {
     sessionDuration: number;
     emotionVariability: number;
     primaryEmotions: string[];
+    repetitiveMotionData?: {
+      classification: string;
+      score: number;
+      dataPoints: number;
+    };
   };
 }
 
@@ -81,7 +97,7 @@ const callOpenAI = async (_prompt: string): Promise<string> => {
 
 export const generateClinicalReport = async (request: ClinicalReportRequest): Promise<ClinicalReport> => {
   try {
-    const { history, emotionLog, sessionDuration } = request;
+    const { history, emotionLog, sessionDuration, repetitiveMotion } = request;
 
     // Build conversation transcript
     const conversationText = history.map(h => 
@@ -93,16 +109,28 @@ export const generateClinicalReport = async (request: ClinicalReportRequest): Pr
     const primaryEmotions = getMostFrequentEmotions(emotions, 3);
     const emotionVariability = calculateEmotionVariability(emotionLog);
 
+    // Create repetitive motion context
+    const repetitiveMotionContext = repetitiveMotion ? `
+REPETITIVE MOTION ANALYSIS:
+- Classification: ${repetitiveMotion.classification}
+- Score: ${repetitiveMotion.score.toFixed(3)}
+- Description: ${repetitiveMotion.description}
+- Dominant Frequencies: ${repetitiveMotion.dominantFrequencies.map(f => f.toFixed(2)).join(', ')} Hz
+- Data Points Analyzed: ${repetitiveMotion.dataPoints}
+- Recommendations: ${repetitiveMotion.recommendations.join('; ')}
+` : '';
+
     // Create the prompt for GPT-4
     const prompt = `You are a clinical assistant specializing in behavioral assessment. 
 
-Given this ASD screening session transcript and emotional observations, generate a DSM-5 aligned clinical report summarizing the participant's behavioral patterns, risk areas, and recommendations.
+Given this ASD screening session transcript, emotional observations, and repetitive motion analysis, generate a DSM-5 aligned clinical report summarizing the participant's behavioral patterns, risk areas, and recommendations.
 
 CONVERSATION TRANSCRIPT:
 ${conversationText}
 
 EMOTIONAL OBSERVATIONS:
 ${emotionLog.map(e => `${e.timestamp.toLocaleTimeString()}: ${e.emotionLabel} (${(e.confidence * 100).toFixed(1)}% confidence)`).join('\n')}
+${repetitiveMotionContext}
 
 SESSION METADATA:
 - Duration: ${sessionDuration} minutes
@@ -118,11 +146,12 @@ Return your response as a JSON object with this exact structure:
   "domainsAddressed": ["List of DSM-5 domains covered in the screening"],
   "keyObservations": ["Specific behavioral observations from responses"],
   "emotionalStateTrends": ["Patterns in emotional responses throughout session"],
+  "repetitiveMotionAnalysis": ["Analysis of repetitive motion patterns if detected"],
   "riskAreas": ["Areas that may require attention or support"],
   "recommendations": ["Specific recommendations for next steps"]
 }
 
-Use professional clinical language and focus on observable behaviors and patterns.`;
+Use professional clinical language and focus on observable behaviors and patterns. If repetitive motion was detected, include relevant clinical observations about motor patterns and their potential significance.`;
 
     const response = await callOpenAI(prompt);
     
@@ -143,6 +172,11 @@ Use professional clinical language and focus on observable behaviors and pattern
         sessionDuration,
         emotionVariability,
         primaryEmotions,
+        repetitiveMotionData: repetitiveMotion ? {
+          classification: repetitiveMotion.classification,
+          score: repetitiveMotion.score,
+          dataPoints: repetitiveMotion.dataPoints,
+        } : undefined,
       };
 
       return {
@@ -182,7 +216,7 @@ const calculateEmotionVariability = (emotionLog: EmotionLogEntry[]): number => {
 
 // Fallback report generator
 const generateFallbackReport = (request: ClinicalReportRequest): ClinicalReport => {
-  const { history, emotionLog, sessionDuration } = request;
+  const { history, emotionLog, sessionDuration, repetitiveMotion } = request;
   const emotions = emotionLog.map(e => e.emotionLabel);
   const primaryEmotions = getMostFrequentEmotions(emotions, 3);
   const emotionVariability = calculateEmotionVariability(emotionLog);
@@ -202,6 +236,12 @@ const generateFallbackReport = (request: ClinicalReportRequest): ClinicalReport 
       `Primary emotions observed: ${primaryEmotions.join(', ')}`,
       "Emotional responses were recorded throughout the session"
     ],
+    repetitiveMotionAnalysis: repetitiveMotion ? [
+      `Repetitive motion classification: ${repetitiveMotion.classification}`,
+      `Analysis score: ${repetitiveMotion.score.toFixed(3)}`,
+      `Dominant frequencies: ${repetitiveMotion.dominantFrequencies.map(f => f.toFixed(2)).join(', ')} Hz`,
+      `Data points analyzed: ${repetitiveMotion.dataPoints}`
+    ] : undefined,
     riskAreas: [
       "Further clinical evaluation recommended for comprehensive assessment"
     ],
@@ -215,6 +255,11 @@ const generateFallbackReport = (request: ClinicalReportRequest): ClinicalReport 
       sessionDuration,
       emotionVariability,
       primaryEmotions,
+      repetitiveMotionData: repetitiveMotion ? {
+        classification: repetitiveMotion.classification,
+        score: repetitiveMotion.score,
+        dataPoints: repetitiveMotion.dataPoints,
+      } : undefined,
     },
   };
 };
@@ -248,6 +293,7 @@ SESSION METADATA
 • Session Duration: ${report.sessionMetadata.sessionDuration} minutes
 • Primary Emotions: ${report.sessionMetadata.primaryEmotions.join(', ')}
 • Emotion Variability: ${report.sessionMetadata.emotionVariability.toFixed(2)}
+${report.sessionMetadata.repetitiveMotionData ? `• Repetitive Motion: ${report.sessionMetadata.repetitiveMotionData.classification} (Score: ${report.sessionMetadata.repetitiveMotionData.score.toFixed(3)}, Data Points: ${report.sessionMetadata.repetitiveMotionData.dataPoints})` : ''}
 
 DISCLAIMER
 This report is based on a screening session and should not be considered a clinical diagnosis. 

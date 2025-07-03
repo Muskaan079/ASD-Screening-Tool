@@ -1,4 +1,18 @@
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+const API_KEY = process.env.REACT_APP_API_KEY || '';
+
+// Helper function to get auth headers
+const getAuthHeaders = () => {
+  const headers = {
+    'Content-Type': 'application/json',
+  };
+  
+  if (API_KEY) {
+    headers['x-api-key'] = API_KEY;
+  }
+  
+  return headers;
+};
 
 export const api = {
   // Test Results
@@ -6,9 +20,7 @@ export const api = {
     try {
       const response = await fetch(`${API_BASE_URL}/test-results`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(testData),
       });
       return await response.json();
