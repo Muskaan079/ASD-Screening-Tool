@@ -1,10 +1,5 @@
 import React, { useMemo } from 'react';
 import { jsPDF } from 'jspdf';
-import 'chart.js/auto';
-import { Chart, registerables } from 'chart.js';
-import { Line, Bar, Doughnut, Radar } from 'react-chartjs-2';
-
-Chart.register(...registerables);
 
 interface ASDScreeningData {
   patientInfo: {
@@ -117,75 +112,6 @@ const MedicalReport: React.FC<MedicalReportProps> = ({ screeningData, onClose })
     const seconds = duration % 60;
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   }, [screeningData.duration]);
-
-  // Chart data for visualizations
-  const domainScoresData = {
-    labels: ['Social', 'Communication', 'Behavior', 'Sensory'],
-    datasets: [{
-      label: 'Domain Scores',
-      data: [
-        screeningData.screeningResults.domains.social,
-        screeningData.screeningResults.domains.communication,
-        screeningData.screeningResults.domains.behavior,
-        screeningData.screeningResults.domains.sensory
-      ],
-      backgroundColor: [
-        'rgba(255, 99, 132, 0.8)',
-        'rgba(54, 162, 235, 0.8)',
-        'rgba(255, 205, 86, 0.8)',
-        'rgba(75, 192, 192, 0.8)'
-      ],
-      borderColor: [
-        'rgba(255, 99, 132, 1)',
-        'rgba(54, 162, 235, 1)',
-        'rgba(255, 205, 86, 1)',
-        'rgba(75, 192, 192, 1)'
-      ],
-      borderWidth: 2
-    }]
-  };
-
-  const riskLevelData = {
-    labels: ['Low Risk', 'Medium Risk', 'High Risk'],
-    datasets: [{
-      data: [
-        screeningData.screeningResults.riskLevel === 'low' ? 1 : 0,
-        screeningData.screeningResults.riskLevel === 'medium' ? 1 : 0,
-        screeningData.screeningResults.riskLevel === 'high' ? 1 : 0
-      ],
-      backgroundColor: [
-        'rgba(75, 192, 192, 0.8)',
-        'rgba(255, 205, 86, 0.8)',
-        'rgba(255, 99, 132, 0.8)'
-      ],
-      borderColor: [
-        'rgba(75, 192, 192, 1)',
-        'rgba(255, 205, 86, 1)',
-        'rgba(255, 99, 132, 1)'
-      ],
-      borderWidth: 2
-    }]
-  };
-
-  const prosodyData = {
-    labels: ['Pitch', 'Volume', 'Speech Rate', 'Clarity'],
-    datasets: [{
-      label: 'Voice Prosody Analysis',
-      data: [
-        screeningData.voiceAnalysis.prosody.pitch,
-        screeningData.voiceAnalysis.prosody.volume,
-        screeningData.voiceAnalysis.prosody.speechRate,
-        screeningData.voiceAnalysis.prosody.clarity
-      ],
-      backgroundColor: 'rgba(54, 162, 235, 0.2)',
-      borderColor: 'rgba(54, 162, 235, 1)',
-      borderWidth: 2,
-      pointBackgroundColor: 'rgba(54, 162, 235, 1)',
-      pointBorderColor: '#fff',
-      pointHoverBackgroundColor: '#fff',
-      pointHoverBorderColor: 'rgba(54, 162, 235, 1)'
-    }]
-  };
 
   const generatePDF = () => {
     const doc = new jsPDF();
@@ -342,91 +268,40 @@ const MedicalReport: React.FC<MedicalReportProps> = ({ screeningData, onClose })
         </div>
       </div>
 
-      {/* Visualizations */}
+      {/* Domain Scores */}
       <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', 
-        gap: 24, 
-        marginBottom: 24 
+        background: 'white', 
+        padding: 24, 
+        borderRadius: 12, 
+        marginBottom: 24,
+        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
       }}>
-        {/* Domain Scores Chart */}
-        <div style={{ 
-          background: 'white', 
-          padding: 24, 
-          borderRadius: 12,
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-        }}>
-          <h3 style={{ margin: '0 0 16px 0', color: '#333' }}>Domain Analysis</h3>
-          <Bar 
-            data={domainScoresData} 
-            options={{
-              responsive: true,
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  max: 1,
-                  ticks: {
-                    callback: function(value) {
-                      return (Number(value) * 100).toFixed(0) + '%';
-                    }
-                  }
-                }
-              },
-              plugins: {
-                legend: {
-                  display: false
-                }
-              }
-            }}
-          />
-        </div>
-
-        {/* Risk Level Chart */}
-        <div style={{ 
-          background: 'white', 
-          padding: 24, 
-          borderRadius: 12,
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-        }}>
-          <h3 style={{ margin: '0 0 16px 0', color: '#333' }}>Risk Assessment</h3>
-          <Doughnut 
-            data={riskLevelData} 
-            options={{
-              responsive: true,
-              plugins: {
-                legend: {
-                  position: 'bottom'
-                }
-              }
-            }}
-          />
-        </div>
-
-        {/* Voice Prosody Chart */}
-        <div style={{ 
-          background: 'white', 
-          padding: 24, 
-          borderRadius: 12,
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-        }}>
-          <h3 style={{ margin: '0 0 16px 0', color: '#333' }}>Voice Prosody Analysis</h3>
-          <Radar 
-            data={prosodyData} 
-            options={{
-              responsive: true,
-              scales: {
-                r: {
-                  beginAtZero: true,
-                  max: 1,
-                  ticks: {
-                    callback: function(value) {
-                      return (Number(value) * 100).toFixed(0) + '%';
-                    }
-                  }
-                }
-              }
-            }}
-          />
+        <h3 style={{ margin: '0 0 16px 0', color: '#333' }}>Domain Analysis</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+          <div style={{ padding: 16, background: '#f8f9fa', borderRadius: 8, textAlign: 'center' }}>
+            <h4 style={{ margin: '0 0 8px 0', color: '#007bff' }}>Social</h4>
+            <div style={{ fontSize: 24, fontWeight: 'bold', color: '#007bff' }}>
+              {(screeningData.screeningResults.domains.social * 100).toFixed(0)}%
+            </div>
+          </div>
+          <div style={{ padding: 16, background: '#f8f9fa', borderRadius: 8, textAlign: 'center' }}>
+            <h4 style={{ margin: '0 0 8px 0', color: '#28a745' }}>Communication</h4>
+            <div style={{ fontSize: 24, fontWeight: 'bold', color: '#28a745' }}>
+              {(screeningData.screeningResults.domains.communication * 100).toFixed(0)}%
+            </div>
+          </div>
+          <div style={{ padding: 16, background: '#f8f9fa', borderRadius: 8, textAlign: 'center' }}>
+            <h4 style={{ margin: '0 0 8px 0', color: '#ffc107' }}>Behavior</h4>
+            <div style={{ fontSize: 24, fontWeight: 'bold', color: '#ffc107' }}>
+              {(screeningData.screeningResults.domains.behavior * 100).toFixed(0)}%
+            </div>
+          </div>
+          <div style={{ padding: 16, background: '#f8f9fa', borderRadius: 8, textAlign: 'center' }}>
+            <h4 style={{ margin: '0 0 8px 0', color: '#17a2b8' }}>Sensory</h4>
+            <div style={{ fontSize: 24, fontWeight: 'bold', color: '#17a2b8' }}>
+              {(screeningData.screeningResults.domains.sensory * 100).toFixed(0)}%
+            </div>
+          </div>
         </div>
       </div>
 
