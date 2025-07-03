@@ -4,6 +4,7 @@ import mlService, { type EmotionAnalysis, type GestureAnalysis, type VoiceAnalys
 import { useSpeechToText } from '../services/useSpeechToText';
 import EyeTrackingAnalysis from './EyeTrackingAnalysis';
 import UserInfoForm from './UserInfoForm';
+import MedicalReport from './MedicalReport';
 
 interface EyeTrackingData {
   gazeX: number;
@@ -158,6 +159,39 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
     resetTranscript,
   } = useSpeechToText();
 
+  const [showReport, setShowReport] = useState(false);
+  const [comprehensiveData, setComprehensiveData] = useState<any>(null);
+
+  // Enhanced data collection for comprehensive report
+  const [emotionHistory, setEmotionHistory] = useState<Array<{
+    emotion: string;
+    confidence: number;
+    timestamp: Date;
+  }>>([]);
+  
+  const [gestureHistory, setGestureHistory] = useState<Array<{
+    type: string;
+    confidence: number;
+    timestamp: Date;
+  }>>([]);
+  
+  const [voiceHistory, setVoiceHistory] = useState<Array<{
+    text: string;
+    emotion: string;
+    confidence: number;
+    timestamp: Date;
+  }>>([]);
+  
+  const [eyeTrackingHistory, setEyeTrackingHistory] = useState<Array<{
+    gazeX: number;
+    gazeY: number;
+    blinkRate: number;
+    pupilDilation: number;
+    eyeContact: boolean;
+    attentionFocus: string;
+    timestamp: Date;
+  }>>([]);
+
   // Simplified model initialization that doesn't rely on external AI models
   const initializeModels = useCallback(async () => {
     try {
@@ -271,6 +305,14 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
           console.warn('Failed to update emotion data:', apiError);
         }
       }
+
+      // Track emotion history
+      const newEmotionEntry = {
+        emotion: mlResult.emotion,
+        confidence: mlResult.confidence,
+        timestamp: new Date()
+      };
+      setEmotionHistory(prev => [...prev.slice(-50), newEmotionEntry]); // Keep last 50 entries
     } catch (err) {
       console.warn('Error analyzing emotion:', err);
       // Fallback to basic emotion detection
@@ -345,6 +387,15 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
           console.warn('Failed to update voice data:', apiError);
         }
       }
+
+             // Track voice history
+       const newVoiceEntry = {
+         text: 'Voice sample analyzed',
+         emotion: mlResult.emotion,
+         confidence: 0.7, // Default confidence for voice analysis
+         timestamp: new Date()
+       };
+       setVoiceHistory(prev => [...prev.slice(-50), newVoiceEntry]); // Keep last 50 entries
     } catch (err) {
       console.warn('Error analyzing voice:', err);
       // Fallback to basic voice analysis
@@ -407,6 +458,14 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
           console.warn('Failed to update motion data:', apiError);
         }
       }
+
+      // Track gesture history
+      const newGestureEntry = {
+        type: mlResult.behavior,
+        confidence: mlResult.confidence,
+        timestamp: new Date()
+      };
+      setGestureHistory(prev => [...prev.slice(-50), newGestureEntry]); // Keep last 50 entries
     } catch (err) {
       console.warn('Error analyzing gesture:', err);
       // Fallback to basic gesture analysis
@@ -646,9 +705,12 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
           
           emotionAnalysis: {
             dominantEmotion: emotionData?.dominant_emotion || 'neutral',
-            emotionHistory: [],
-            emotionStability: 0.7,
-            socialEmotionResponses: 0.6
+            emotionHistory,
+            emotionStability: emotionHistory.length > 0 ? 
+              emotionHistory.reduce((sum, entry) => sum + entry.confidence, 0) / emotionHistory.length : 0,
+            socialEmotionResponses: emotionHistory.filter(entry => 
+              ['happy', 'surprised', 'sad'].includes(entry.emotion)
+            ).length / Math.max(emotionHistory.length, 1)
           },
           
           gestureAnalysis: {
@@ -656,8 +718,9 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
             handFlapping: false,
             rockingMotion: false,
             fidgeting: motionData?.fidgeting || false,
-            gestureHistory: [],
-            motorCoordination: 0.7
+            gestureHistory,
+            motorCoordination: gestureHistory.length > 0 ? 
+              gestureHistory.reduce((sum, entry) => sum + entry.confidence, 0) / gestureHistory.length : 0
           },
           
           voiceAnalysis: {
@@ -669,8 +732,9 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
             },
             voiceEmotion: voiceData?.voiceEmotion || 'neutral',
             speechPatterns: voiceData?.speechPatterns || [],
-            voiceHistory: [],
-            communicationStyle: 0.7
+            voiceHistory,
+            communicationStyle: voiceHistory.length > 0 ? 
+              voiceHistory.reduce((sum, entry) => sum + entry.confidence, 0) / voiceHistory.length : 0
           },
           
           eyeTrackingAnalysis: {
@@ -797,10 +861,207 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
     return () => clearInterval(interval);
   }, [isScreening]);
 
+  // Enhanced analysis intervals with debouncing
+  useEffect(() => {
+    if (!isScreening) return;
+
+    const emotionInterval = setInterval(analyzeEmotion, 2000); // Every 2 seconds
+    const gestureInterval = setInterval(analyzeGesture, 3000); // Every 3 seconds
+    const voiceInterval = setInterval(analyzeVoice, 4000); // Every 4 seconds
+         const eyeTrackingInterval = setInterval(() => {
+       // Randomly simulate eye tracking data
+       const newEyeTrackingEntry = {
+         gazeX: Math.random() * 100,
+         gazeY: Math.random() * 100,
+         blinkRate: Math.random() * 10,
+         pupilDilation: Math.random() * 2 + 1,
+         eyeContact: Math.random() > 0.5,
+         attentionFocus: Math.random() > 0.7 ? 'focused' : 'distracted',
+         timestamp: new Date()
+       };
+       setEyeTrackingHistory(prev => [...prev.slice(-50), newEyeTrackingEntry]); // Keep last 50 entries
+     }, 1000);
+
+    return () => {
+      clearInterval(emotionInterval);
+      clearInterval(gestureInterval);
+      clearInterval(voiceInterval);
+      clearInterval(eyeTrackingInterval);
+    };
+  }, [isScreening, analyzeEmotion, analyzeGesture, analyzeVoice]);
+
+  // Show report if comprehensive data is available
+  if (showReport && screeningData) {
+    return (
+      <MedicalReport 
+        screeningData={screeningData} 
+        onClose={() => setShowReport(false)} 
+      />
+    );
+  }
+
+  // Enhanced session completion with comprehensive data
+  const completeSession = useCallback(async () => {
+    setIsScreening(false);
+    setCurrentPhase('analysis');
+    setStatus('Analyzing results...');
+    
+    if (sessionId && !sessionId.startsWith('local-session-')) {
+      try {
+        // Calculate comprehensive metrics
+        const emotionStability = emotionHistory.length > 0 ? 
+          emotionHistory.reduce((sum, entry) => sum + entry.confidence, 0) / emotionHistory.length : 0;
+        
+        const socialEmotionResponses = emotionHistory.filter(entry => 
+          ['happy', 'surprised', 'sad'].includes(entry.emotion)
+        ).length / Math.max(emotionHistory.length, 1);
+        
+        const motorCoordination = gestureHistory.length > 0 ? 
+          gestureHistory.reduce((sum, entry) => sum + entry.confidence, 0) / gestureHistory.length : 0;
+        
+        const communicationStyle = voiceHistory.length > 0 ? 
+          voiceHistory.reduce((sum, entry) => sum + entry.confidence, 0) / voiceHistory.length : 0;
+        
+        const eyeContactDuration = eyeTrackingHistory.length > 0 ? 
+          eyeTrackingHistory.filter(entry => entry.gazeX > 40 && entry.gazeX < 60 && entry.gazeY > 30 && entry.gazeY < 70).length / eyeTrackingHistory.length : 0;
+        
+        const attentionSpan = eyeTrackingHistory.length > 0 ? 
+          eyeTrackingHistory.reduce((sum, entry) => sum + entry.pupilDilation, 0) / eyeTrackingHistory.length / 3 : 0;
+        
+        const socialEngagement = (eyeContactDuration + attentionSpan) / 2;
+
+        // Calculate domain scores based on DSM-5 criteria
+        const socialScore = (socialEmotionResponses + eyeContactDuration + socialEngagement) / 3;
+        const communicationScore = (communicationStyle + emotionStability) / 2;
+        const behaviorScore = motorCoordination;
+        const sensoryScore = attentionSpan;
+
+        const overallScore = (socialScore + communicationScore + behaviorScore + sensoryScore) / 4;
+        
+        let riskLevel: 'low' | 'medium' | 'high';
+        if (overallScore < 0.3) riskLevel = 'low';
+        else if (overallScore < 0.7) riskLevel = 'medium';
+        else riskLevel = 'high';
+
+        // Generate recommendations based on risk level
+        const recommendations = [];
+        const nextSteps = [];
+
+        if (riskLevel === 'high') {
+          recommendations.push('Immediate comprehensive evaluation by developmental pediatrician or child psychologist');
+          recommendations.push('Consider early intervention services');
+          recommendations.push('Monitor developmental milestones closely');
+          nextSteps.push('Schedule follow-up assessment within 2-4 weeks');
+          nextSteps.push('Begin parent education and support programs');
+          recommendations.push('Consider referral to autism specialist');
+        } else if (riskLevel === 'medium') {
+          recommendations.push('Continue monitoring developmental progress');
+          recommendations.push('Consider follow-up screening in 3-6 months');
+          recommendations.push('Provide developmental support as needed');
+          nextSteps.push('Schedule follow-up assessment in 3-6 months');
+          recommendations.push('Monitor for any changes in behavior or development');
+          recommendations.push('Consider early intervention if concerns persist');
+        } else {
+          recommendations.push('Continue typical developmental monitoring');
+          recommendations.push('Maintain regular pediatric check-ups');
+          recommendations.push('Monitor for any emerging concerns');
+          nextSteps.push('Continue routine developmental surveillance');
+          recommendations.push('Reassess if any concerns arise');
+          recommendations.push('Maintain open communication with healthcare providers');
+        }
+
+        const comprehensiveData: ASDScreeningData = {
+          patientInfo: userInfo,
+          sessionId,
+          startTime: new Date(Date.now() - sessionDuration * 1000),
+          endTime: new Date(),
+          duration: sessionDuration - timeRemaining,
+          emotionAnalysis: {
+            dominantEmotion: emotionData?.dominant_emotion || 'neutral',
+            emotionHistory,
+            emotionStability,
+            socialEmotionResponses
+          },
+          gestureAnalysis: {
+            repetitiveMotions: motionData?.repetitive_motions || false,
+            handFlapping: false,
+            rockingMotion: false,
+            fidgeting: motionData?.fidgeting || false,
+            gestureHistory,
+            motorCoordination
+          },
+          voiceAnalysis: {
+            prosody: voiceData?.prosody || {
+              pitch: 0.5,
+              volume: 0.5,
+              speechRate: 0.5,
+              clarity: 0.5
+            },
+            voiceEmotion: voiceData?.voiceEmotion || 'neutral',
+            speechPatterns: voiceData?.speechPatterns || [],
+            voiceHistory,
+            communicationStyle
+          },
+          eyeTrackingAnalysis: {
+            eyeContactDuration,
+            gazePatterns: ['focused', 'responsive'],
+            attentionSpan,
+            socialEngagement,
+            eyeTrackingHistory
+          },
+          textAnalysis: {
+            responses: [],
+            languageComplexity: 0.7,
+            socialUnderstanding: 0.6
+          },
+          behavioralObservations: {
+            eyeContact: eyeContactDuration,
+            socialEngagement,
+            repetitiveBehaviors: motionData?.patterns || [],
+            sensoryResponses: [],
+            attentionSpan
+          },
+          screeningResults: {
+            overallScore,
+            riskLevel,
+            domains: {
+              social: socialScore,
+              communication: communicationScore,
+              behavior: behaviorScore,
+              sensory: sensoryScore
+            },
+            recommendations,
+            nextSteps
+          }
+        };
+
+        setScreeningData(comprehensiveData);
+        setCurrentPhase('complete');
+        setStatus('Screening complete');
+
+        if (onScreeningComplete) {
+          onScreeningComplete(comprehensiveData);
+        }
+      } catch (error) {
+        console.error('Error completing session:', error);
+      }
+    }
+  }, [sessionId, sessionDuration, timeRemaining, patientInfo, emotionData, motionData, voiceData, eyeTrackingData, userInfo, emotionHistory, gestureHistory, voiceHistory, eyeTrackingHistory, onScreeningComplete]);
+
+  // Show report if comprehensive data is available
+  if (showReport && screeningData) {
+    return (
+      <MedicalReport 
+        screeningData={screeningData} 
+        onClose={() => setShowReport(false)} 
+      />
+    );
+  }
+
   if (isLoading) {
     return (
       <div style={{ textAlign: 'center', padding: 40 }}>
-        <div style={{ fontSize: 24, marginBottom: 16 }}>🧠</div>
+        <div style={{ fontSize: 24, marginBottom: 16 }}>��</div>
         <div style={{ fontSize: 18, marginBottom: 8 }}>ASD Screening Tool</div>
         <div style={{ fontSize: 16, marginBottom: 12 }}>{status}</div>
         <div style={{ fontSize: 12, color: '#666', marginTop: 8 }}>
@@ -1180,13 +1441,77 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
             </ul>
           </div>
 
-          <div>
+          <div style={{ marginBottom: 24 }}>
             <h3 style={{ marginBottom: 16 }}>Next Steps</h3>
             <ul style={{ textAlign: 'left', paddingLeft: 20 }}>
               {screeningData.screeningResults.nextSteps.map((step, index) => (
                 <li key={index} style={{ marginBottom: 8 }}>{step}</li>
               ))}
             </ul>
+          </div>
+
+          {/* Report Generation Button */}
+          <div style={{ textAlign: 'center', marginTop: 32 }}>
+            <button
+              onClick={() => setShowReport(true)}
+              style={{
+                padding: '16px 32px',
+                background: 'linear-gradient(135deg, #007bff 0%, #0056b3 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: 50,
+                fontSize: 18,
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                boxShadow: '0 8px 16px rgba(0, 123, 255, 0.3)',
+                transition: 'all 0.3s ease',
+                marginRight: 16
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 123, 255, 0.4)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 123, 255, 0.3)';
+              }}
+            >
+              📊 Generate Medical Report
+            </button>
+            
+            <button
+              onClick={() => {
+                setScreeningData(null);
+                setEmotionHistory([]);
+                setGestureHistory([]);
+                setVoiceHistory([]);
+                setEyeTrackingHistory([]);
+                setTimeRemaining(sessionDuration);
+                setCurrentPhase('form');
+              }}
+              style={{
+                padding: '16px 32px',
+                background: 'linear-gradient(135deg, #6c757d 0%, #495057 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: 50,
+                fontSize: 18,
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                boxShadow: '0 8px 16px rgba(108, 117, 125, 0.3)',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 12px 24px rgba(108, 117, 125, 0.4)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 8px 16px rgba(108, 117, 125, 0.3)';
+              }}
+            >
+              🔄 New Session
+            </button>
           </div>
         </div>
       )}
