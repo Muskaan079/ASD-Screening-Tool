@@ -23,8 +23,8 @@ SUPABASE_URL=https://coyrwjexrrfynjaalmpr.supabase.co
 SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNveXJ3amV4cnJmeW5qYWFsbXByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE1MjYzMTIsImV4cCI6MjA2NzEwMjMxMn0.nVZERCvL4K90dtUJjW6hchzgSpF_yzHbrNtEz-XZ6Cw
 SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNveXJ3amV4cnJmeW5qYWFsbXByIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MTUyNjMxMiwiZXhwIjoyMDY3MTAyMzEyfQ.__lkF2q7_W6EiZV0BROsldUBFHQNRzwxXP76K6x9vuc
 
-# PostgreSQL Connection (Direct connection to Supabase) - Force IPv4
-DATABASE_URL=postgresql://postgres:${encodedPassword}@db.coyrwjexrrfynjaalmpr.supabase.co:5432/postgres?family=4
+# PostgreSQL Connection (Direct connection to Supabase)
+DATABASE_URL=postgresql://postgres:${encodedPassword}@db.coyrwjexrrfynjaalmpr.supabase.co:5432/postgres
 `;
 
 fs.writeFileSync('.env', envContent);

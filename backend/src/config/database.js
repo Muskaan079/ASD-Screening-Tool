@@ -3,9 +3,28 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+// Parse connection string to extract components
+const parseConnectionString = (connectionString) => {
+  const url = new URL(connectionString);
+  return {
+    host: url.hostname,
+    port: parseInt(url.port),
+    database: url.pathname.slice(1), // Remove leading slash
+    user: url.username,
+    password: url.password,
+  };
+};
+
 // Database configuration
+const connectionString = process.env.DATABASE_URL;
+const connectionParams = parseConnectionString(connectionString);
+
 const dbConfig = {
-  connectionString: process.env.DATABASE_URL,
+  host: connectionParams.host,
+  port: connectionParams.port,
+  database: connectionParams.database,
+  user: connectionParams.user,
+  password: connectionParams.password,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
   max: 20, // Maximum number of clients in the pool
   idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
@@ -20,12 +39,22 @@ export const pool = new Pool(dbConfig);
 // Test database connection
 export const testConnection = async () => {
   try {
+    console.log('🔍 Attempting database connection with config:', {
+      host: dbConfig.host,
+      port: dbConfig.port,
+      database: dbConfig.database,
+      user: dbConfig.user,
+      family: dbConfig.family,
+      ssl: dbConfig.ssl
+    });
+    
     const client = await pool.connect();
     console.log('✅ PostgreSQL connection successful');
     client.release();
     return true;
   } catch (error) {
     console.error('❌ PostgreSQL connection failed:', error.message);
+    console.error('❌ Full error:', error);
     return false;
   }
 };
