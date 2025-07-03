@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as tf from '@tensorflow/tfjs';
 import * as poseDetection from '@tensorflow-models/pose-detection';
-import { Pose } from '@mediapipe/pose';
+import { Pose, POSE_CONNECTIONS } from '@mediapipe/pose';
 import { Camera } from '@mediapipe/camera_utils';
 import { drawConnectors, drawLandmarks } from '@mediapipe/drawing_utils';
 import * as faceapi from 'face-api.js';
@@ -216,7 +216,7 @@ const EnhancedGestureAnalysis: React.FC<EnhancedGestureAnalysisProps> = ({
 
         // Draw pose landmarks
         if (results.poseLandmarks) {
-          drawConnectors(ctx, results.poseLandmarks, pose.POSE_CONNECTIONS, {
+          drawConnectors(ctx, results.poseLandmarks, POSE_CONNECTIONS, {
             color: '#00FF00',
             lineWidth: 2
           });
@@ -837,7 +837,7 @@ const EnhancedGestureAnalysis: React.FC<EnhancedGestureAnalysisProps> = ({
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         @keyframes pulse {
           0% { opacity: 1; }
           50% { opacity: 0.5; }
