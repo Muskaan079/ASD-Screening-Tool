@@ -40,10 +40,12 @@ app.get('/api/ping', (req, res) => {
 // Import and use screening routes
 import screeningRoutes from './routes/screening.js';
 import analyticsRoutes from './routes/analytics.js';
+import comprehensiveScreeningRoutes from './routes/comprehensiveScreening.js';
 
 // Apply authentication to sensitive routes
 app.use('/api/screening', authenticateAPI, screeningRoutes);
 app.use('/api/analytics', authenticateAPI, analyticsRoutes);
+app.use('/api/comprehensive-screening', authenticateAPI, comprehensiveScreeningRoutes);
 
 // Admin endpoints for cleanup (additional authentication)
 app.get('/api/admin/cleanup-stats', authenticateAPI, async (req, res) => {
@@ -98,6 +100,7 @@ const startServer = async () => {
       console.log(`🔗 CORS Origin: ${process.env.CORS_ORIGIN || 'http://localhost:5173'}`);
       console.log(`🗄️  Database: In-memory (no external dependencies)`);
       console.log(`🔐 Authentication: ${process.env.API_SECRET_KEY ? 'Enabled' : 'Disabled'}`);
+      console.log(`🧠 Comprehensive screening routes enabled`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);

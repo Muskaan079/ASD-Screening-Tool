@@ -53,6 +53,18 @@ interface MotionData {
   timestamp: string;
 }
 
+interface VoiceData {
+  prosody: {
+    pitch: number;
+    volume: number;
+    speechRate: number;
+    clarity: number;
+  };
+  voiceEmotion: string;
+  speechPatterns: string[];
+  timestamp: string;
+}
+
 class APIService {
   private async makeRequest(endpoint: string, options: RequestInit = {}) {
     const url = `${API_BASE_URL}${endpoint}`;
@@ -92,6 +104,14 @@ class APIService {
   // Start a new screening session
   async startScreening(patientInfo: PatientInfo): Promise<{ success: boolean; sessionId: string; session: ScreeningSession }> {
     return this.makeRequest('/screening/start', {
+      method: 'POST',
+      body: JSON.stringify({ patientInfo }),
+    });
+  }
+
+  // Start a new comprehensive screening session
+  async startComprehensiveScreening(patientInfo: PatientInfo): Promise<{ success: boolean; sessionId: string; session: ScreeningSession }> {
+    return this.makeRequest('/comprehensive-screening/start', {
       method: 'POST',
       body: JSON.stringify({ patientInfo }),
     });
@@ -156,6 +176,17 @@ class APIService {
     });
   }
 
+  // Update comprehensive emotion data
+  async updateComprehensiveEmotionData(sessionId: string, emotionData: EmotionData): Promise<{ success: boolean; message: string; emotionCount: number }> {
+    return this.makeRequest('/comprehensive-screening/emotion-data', {
+      method: 'POST',
+      body: JSON.stringify({
+        sessionId,
+        emotionData,
+      }),
+    });
+  }
+
   // Update motion data
   async updateMotionData(sessionId: string, motionData: MotionData): Promise<{ success: boolean; message: string }> {
     return this.makeRequest('/screening/motion-data', {
@@ -163,6 +194,28 @@ class APIService {
       body: JSON.stringify({
         sessionId,
         motionData,
+      }),
+    });
+  }
+
+  // Update comprehensive motion data
+  async updateComprehensiveMotionData(sessionId: string, motionData: MotionData): Promise<{ success: boolean; message: string; motionCount: number }> {
+    return this.makeRequest('/comprehensive-screening/motion-data', {
+      method: 'POST',
+      body: JSON.stringify({
+        sessionId,
+        motionData,
+      }),
+    });
+  }
+
+  // Update comprehensive voice data
+  async updateComprehensiveVoiceData(sessionId: string, voiceData: VoiceData): Promise<{ success: boolean; message: string; voiceCount: number }> {
+    return this.makeRequest('/comprehensive-screening/voice-data', {
+      method: 'POST',
+      body: JSON.stringify({
+        sessionId,
+        voiceData,
       }),
     });
   }
@@ -187,6 +240,45 @@ class APIService {
     return this.makeRequest(`/screening/status/${sessionId}`);
   }
 
+  // Get comprehensive screening status
+  async getComprehensiveScreeningStatus(sessionId: string): Promise<{
+    success: boolean;
+    session: {
+      id: string;
+      patientInfo: PatientInfo;
+      status: string;
+      phase: string;
+      startTime: string;
+      lastUpdated: string;
+      duration: number;
+      dataCounts: {
+        emotionData: number;
+        motionData: number;
+        voiceData: number;
+        textResponses: number;
+      };
+    };
+  }> {
+    return this.makeRequest(`/comprehensive-screening/status/${sessionId}`);
+  }
+
+  // Get real-time analysis
+  async getRealTimeAnalysis(sessionId: string): Promise<{
+    success: boolean;
+    realTimeAnalysis: {
+      emotion: any;
+      gesture: any;
+      voice: any;
+      dataAvailable: {
+        emotion: boolean;
+        motion: boolean;
+        voice: boolean;
+      };
+    };
+  }> {
+    return this.makeRequest(`/comprehensive-screening/analysis/${sessionId}`);
+  }
+
   // Generate final report
   async generateReport(sessionId: string, practitionerInfo?: any): Promise<{
     success: boolean;
@@ -202,10 +294,28 @@ class APIService {
     });
   }
 
+  // Generate comprehensive report
+  async generateComprehensiveReport(sessionId: string, practitionerInfo?: any): Promise<{
+    success: boolean;
+    report: any;
+    sessionId: string;
+    assessment: any;
+    message: string;
+  }> {
+    return this.makeRequest('/comprehensive-screening/generate-report', {
+      method: 'POST',
+      body: JSON.stringify({
+        sessionId,
+        practitionerInfo,
+      }),
+    });
+  }
+
   // End screening session
   async endScreening(sessionId: string): Promise<{ success: boolean; message: string; sessionId: string }> {
-    return this.makeRequest(`/screening/end/${sessionId}`, {
+    return this.makeRequest('/screening/end', {
       method: 'POST',
+      body: JSON.stringify({ sessionId }),
     });
   }
 
@@ -215,7 +325,7 @@ class APIService {
     if (sessionId) params.append('sessionId', sessionId);
     if (eventType) params.append('eventType', eventType);
     if (limit) params.append('limit', limit.toString());
-    
+
     return this.makeRequest(`/analytics/events?${params.toString()}`);
   }
 
@@ -229,7 +339,7 @@ class APIService {
       abandoned_sessions: number;
     };
   }> {
-    return this.makeRequest('/analytics/session-statistics');
+    return this.makeRequest('/analytics/session-stats');
   }
 }
 
@@ -237,4 +347,4 @@ class APIService {
 const apiService = new APIService();
 
 export default apiService;
-export type { PatientInfo, ScreeningSession, Question, Response, EmotionData, MotionData }; 
+export type { PatientInfo, ScreeningSession, Question, Response, EmotionData, MotionData, VoiceData }; 

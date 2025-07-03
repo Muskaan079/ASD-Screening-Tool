@@ -5,19 +5,7 @@ const LandingPage: React.FC = () => {
   const navigate = useNavigate();
 
   const handleStartScreening = () => {
-    navigate('/chat');
-  };
-
-  const handleTestGesture = () => {
-    navigate('/test-gesture');
-  };
-
-  const handleLiveAnalysis = () => {
-    navigate('/live-analysis');
-  };
-
-  const handleEnhancedGesture = () => {
-    navigate('/enhanced-gesture');
+    navigate('/screening');
   };
 
   return (
@@ -68,226 +56,109 @@ const LandingPage: React.FC = () => {
           marginLeft: 'auto',
           marginRight: 'auto'
         }}>
-          Early autism screening with real-time multimodal insights
+          Comprehensive autism screening with real-time multimodal analysis
         </p>
 
         {/* Features */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-          gap: 24,
+          gap: 20,
           marginBottom: 40
         }}>
           <div style={{
-            background: '#f7fafc',
-            padding: 24,
+            padding: 20,
+            background: 'rgba(102, 126, 234, 0.1)',
             borderRadius: 12,
-            border: '1px solid #e2e8f0'
+            border: '1px solid rgba(102, 126, 234, 0.2)'
           }}>
             <div style={{ fontSize: 32, marginBottom: 12 }}>🎭</div>
-            <h3 style={{ margin: '0 0 8px 0', color: '#2d3748', fontSize: '1.1rem' }}>
-              Facial Emotion Detection
-            </h3>
-            <p style={{ margin: 0, color: '#4a5568', fontSize: '0.9rem' }}>
-              Real-time emotion analysis using advanced AI
+            <h3 style={{ margin: '0 0 8px 0', color: '#2d3748' }}>Emotion Analysis</h3>
+            <p style={{ margin: 0, color: '#4a5568', fontSize: 14 }}>
+              Real-time facial emotion detection using advanced AI
             </p>
           </div>
 
           <div style={{
-            background: '#f7fafc',
-            padding: 24,
+            padding: 20,
+            background: 'rgba(118, 75, 162, 0.1)',
             borderRadius: 12,
-            border: '1px solid #e2e8f0'
+            border: '1px solid rgba(118, 75, 162, 0.2)'
           }}>
-            <div style={{ fontSize: 32, marginBottom: 12 }}>🎬</div>
-            <h3 style={{ margin: '0 0 8px 0', color: '#2d3748', fontSize: '1.1rem' }}>
-              Live Video Analysis
-            </h3>
-            <p style={{ margin: 0, color: '#4a5568', fontSize: '0.9rem' }}>
-              Real-time gesture and behavior tracking
+            <div style={{ fontSize: 32, marginBottom: 12 }}>🤲</div>
+            <h3 style={{ margin: '0 0 8px 0', color: '#2d3748' }}>Gesture Tracking</h3>
+            <p style={{ margin: 0, color: '#4a5568', fontSize: 14 }}>
+              Advanced hand and body movement analysis
             </p>
           </div>
 
           <div style={{
-            background: '#f7fafc',
-            padding: 24,
+            padding: 20,
+            background: 'rgba(102, 126, 234, 0.1)',
             borderRadius: 12,
-            border: '1px solid #e2e8f0'
+            border: '1px solid rgba(102, 126, 234, 0.2)'
           }}>
-            <div style={{ fontSize: 32, marginBottom: 12 }}>🎙️</div>
-            <h3 style={{ margin: '0 0 8px 0', color: '#2d3748', fontSize: '1.1rem' }}>
-              Voice Input Support
-            </h3>
-            <p style={{ margin: 0, color: '#4a5568', fontSize: '0.9rem' }}>
-              Natural speech-to-text for easy interaction
+            <div style={{ fontSize: 32, marginBottom: 12 }}>🎤</div>
+            <h3 style={{ margin: '0 0 8px 0', color: '#2d3748' }}>Voice Analysis</h3>
+            <p style={{ margin: 0, color: '#4a5568', fontSize: 14 }}>
+              Speech pattern and prosody analysis
             </p>
           </div>
 
           <div style={{
-            background: '#f7fafc',
-            padding: 24,
+            padding: 20,
+            background: 'rgba(118, 75, 162, 0.1)',
             borderRadius: 12,
-            border: '1px solid #e2e8f0'
+            border: '1px solid rgba(118, 75, 162, 0.2)'
           }}>
-            <div style={{ fontSize: 32, marginBottom: 12 }}>🧠</div>
-            <h3 style={{ margin: '0 0 8px 0', color: '#2d3748', fontSize: '1.1rem' }}>
-              Adaptive Questions
-            </h3>
-            <p style={{ margin: 0, color: '#4a5568', fontSize: '0.9rem' }}>
-              AI-powered dynamic screening based on responses
-            </p>
-          </div>
-
-          <div style={{
-            background: '#f7fafc',
-            padding: 24,
-            borderRadius: 12,
-            border: '1px solid #e2e8f0'
-          }}>
-            <div style={{ fontSize: 32, marginBottom: 12 }}>🎯</div>
-            <h3 style={{ margin: '0 0 8px 0', color: '#2d3748', fontSize: '1.1rem' }}>
-              Advanced Body Tracking
-            </h3>
-            <p style={{ margin: 0, color: '#4a5568', fontSize: '0.9rem' }}>
-              TensorFlow.js + MediaPipe for comprehensive gesture analysis
+            <div style={{ fontSize: 32, marginBottom: 12 }}>📊</div>
+            <h3 style={{ margin: '0 0 8px 0', color: '#2d3748' }}>Comprehensive Report</h3>
+            <p style={{ margin: 0, color: '#4a5568', fontSize: 14 }}>
+              Detailed clinical assessment and recommendations
             </p>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button
-            onClick={handleStartScreening}
-            style={{
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              color: 'white',
-              border: 'none',
-              borderRadius: 50,
-              padding: '16px 40px',
-              fontSize: '1.1rem',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              boxShadow: '0 8px 16px rgba(102, 126, 234, 0.3)',
-              transition: 'all 0.3s ease',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 12
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 12px 24px rgba(102, 126, 234, 0.4)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 8px 16px rgba(102, 126, 234, 0.3)';
-            }}
-          >
-            🚀 Start Screening
-          </button>
-
-          <button
-            onClick={handleLiveAnalysis}
-            style={{
-              background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)',
-              color: 'white',
-              border: 'none',
-              borderRadius: 50,
-              padding: '16px 32px',
-              fontSize: '1rem',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              boxShadow: '0 8px 16px rgba(255, 107, 107, 0.3)',
-              transition: 'all 0.3s ease',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 12
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 12px 24px rgba(255, 107, 107, 0.4)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 8px 16px rgba(255, 107, 107, 0.3)';
-            }}
-          >
-            🎬 Live Video Analysis
-          </button>
-
-          <button
-            onClick={handleTestGesture}
-            style={{
-              background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)',
-              color: 'white',
-              border: 'none',
-              borderRadius: 50,
-              padding: '16px 32px',
-              fontSize: '1rem',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              boxShadow: '0 8px 16px rgba(40, 167, 69, 0.3)',
-              transition: 'all 0.3s ease',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 12
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 12px 24px rgba(40, 167, 69, 0.4)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 8px 16px rgba(40, 167, 69, 0.3)';
-            }}
-          >
-            🧪 Test Gesture Analysis
-          </button>
-
-          <button
-            onClick={handleEnhancedGesture}
-            style={{
-              background: 'linear-gradient(135deg, #9c27b0 0%, #673ab7 100%)',
-              color: 'white',
-              border: 'none',
-              borderRadius: 50,
-              padding: '16px 32px',
-              fontSize: '1rem',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              boxShadow: '0 8px 16px rgba(156, 39, 176, 0.3)',
-              transition: 'all 0.3s ease',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 12
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 12px 24px rgba(156, 39, 176, 0.4)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 8px 16px rgba(156, 39, 176, 0.3)';
-            }}
-          >
-            🎯 Enhanced Gesture Analysis
-          </button>
-        </div>
+        {/* Start Button */}
+        <button
+          onClick={handleStartScreening}
+          style={{
+            padding: '20px 40px',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+            border: 'none',
+            borderRadius: 50,
+            fontSize: '1.25rem',
+            fontWeight: 'bold',
+            cursor: 'pointer',
+            boxShadow: '0 10px 30px rgba(102, 126, 234, 0.3)',
+            transition: 'all 0.3s ease',
+            minWidth: 250
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 15px 40px rgba(102, 126, 234, 0.4)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 10px 30px rgba(102, 126, 234, 0.3)';
+          }}
+        >
+          🚀 Start Comprehensive Screening
+        </button>
 
         {/* Disclaimer */}
         <div style={{
-          marginTop: 40,
+          marginTop: 30,
           padding: 16,
-          background: '#fff3cd',
-          border: '1px solid #ffeaa7',
+          background: 'rgba(255, 193, 7, 0.1)',
           borderRadius: 8,
-          fontSize: '0.9rem',
-          color: '#856404',
-          maxWidth: 600,
-          marginLeft: 'auto',
-          marginRight: 'auto'
+          border: '1px solid rgba(255, 193, 7, 0.3)',
+          fontSize: 14,
+          color: '#856404'
         }}>
-          <strong>Important:</strong> This tool is for screening purposes only and does not provide a clinical diagnosis. 
-          Please consult with a qualified healthcare professional for comprehensive evaluation.
+          <strong>Important:</strong> This tool is designed to assist healthcare professionals in ASD screening. 
+          It is not a diagnostic tool and should be used as part of a comprehensive evaluation process.
         </div>
       </div>
     </div>
