@@ -453,6 +453,9 @@ const EnhancedGestureAnalysis: React.FC<EnhancedGestureAnalysisProps> = ({
   // Start analysis session
   const startAnalysis = useCallback(async () => {
     try {
+      setIsRecording(true);
+      setError(null);
+      
       // Initialize all models
       await Promise.all([
         initializeTensorFlow(),
@@ -491,6 +494,7 @@ const EnhancedGestureAnalysis: React.FC<EnhancedGestureAnalysisProps> = ({
         clearInterval(countdownInterval);
       };
     } catch (error) {
+      setIsRecording(false);
       setError('Failed to start enhanced analysis session');
       console.error('Error starting analysis:', error);
     }

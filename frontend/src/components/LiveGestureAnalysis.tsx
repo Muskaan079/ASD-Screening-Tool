@@ -249,7 +249,6 @@ const LiveGestureAnalysis: React.FC<LiveGestureAnalysisProps> = ({
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         setCameraStatus('Camera active - video feed should be visible');
-        setIsRecording(true);
         
         // Ensure video is visible
         videoRef.current.onloadedmetadata = () => {
@@ -311,6 +310,9 @@ const LiveGestureAnalysis: React.FC<LiveGestureAnalysisProps> = ({
   // Start analysis session
   const startAnalysis = useCallback(async () => {
     try {
+      setIsRecording(true);
+      setError(null);
+      
       // Create backend session
       const result = await apiService.startScreening(patientInfo);
       setSessionId(result.sessionId);
@@ -341,6 +343,7 @@ const LiveGestureAnalysis: React.FC<LiveGestureAnalysisProps> = ({
         clearInterval(countdownInterval);
       };
     } catch (error) {
+      setIsRecording(false);
       setError('Failed to start analysis session');
       console.error('Error starting analysis:', error);
     }
