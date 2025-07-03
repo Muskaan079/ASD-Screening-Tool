@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as faceapi from 'face-api.js';
 import apiService, { type EmotionData, type MotionData } from '../services/api';
 
+// Live Gesture Analysis Component - Fixed TypeScript issues
 interface LiveGestureAnalysisProps {
   onAnalysisComplete?: (results: any) => void;
   sessionDuration?: number; // in seconds
