@@ -212,64 +212,68 @@ const MedicalReport: React.FC<MedicalReportProps> = ({ screeningData, onClose })
       maxWidth: 1200, 
       margin: '0 auto', 
       padding: 20, 
-      backgroundColor: '#f8f9fa',
-      minHeight: '100vh'
+      backgroundColor: '#1a1a2e',
+      minHeight: '100vh',
+      color: '#ffffff'
     }}>
       {/* Header */}
       <div style={{ 
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: 'linear-gradient(135deg, #0f3460 0%, #16213e 100%)',
         color: 'white',
         padding: 30,
         borderRadius: 12,
         marginBottom: 30,
-        textAlign: 'center'
+        textAlign: 'center',
+        border: '1px solid #2d3748'
       }}>
-        <h1 style={{ margin: 0, fontSize: 32 }}>🧠 ASD Screening Report</h1>
-        <p style={{ margin: '10px 0 0 0', fontSize: 16, opacity: 0.9 }}>
+        <h1 style={{ margin: 0, fontSize: 32, color: '#ffffff' }}>🧠 ASD Screening Report</h1>
+        <p style={{ margin: '10px 0 0 0', fontSize: 16, color: '#e2e8f0' }}>
           Comprehensive Analysis Report for Healthcare Practitioners
         </p>
       </div>
 
       {/* Patient Information Card */}
       <div style={{ 
-        background: 'white', 
+        background: '#2d3748', 
         padding: 24, 
         borderRadius: 12, 
         marginBottom: 24,
-        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+        boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
+        border: '1px solid #4a5568'
       }}>
-        <h2 style={{ margin: '0 0 16px 0', color: '#333' }}>Patient Information</h2>
+        <h2 style={{ margin: '0 0 16px 0', color: '#ffffff' }}>Patient Information</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
-          <div>
-            <strong>Name:</strong> {screeningData.patientInfo.name}
+          <div style={{ color: '#e2e8f0' }}>
+            <strong style={{ color: '#63b3ed' }}>Name:</strong> {screeningData.patientInfo.name}
           </div>
-          <div>
-            <strong>Age:</strong> {screeningData.patientInfo.age} years
+          <div style={{ color: '#e2e8f0' }}>
+            <strong style={{ color: '#63b3ed' }}>Age:</strong> {screeningData.patientInfo.age} years
           </div>
-          <div>
-            <strong>Gender:</strong> {screeningData.patientInfo.gender || 'Not specified'}
+          <div style={{ color: '#e2e8f0' }}>
+            <strong style={{ color: '#63b3ed' }}>Gender:</strong> {screeningData.patientInfo.gender || 'Not specified'}
           </div>
-          <div>
-            <strong>Session ID:</strong> {screeningData.sessionId}
+          <div style={{ color: '#e2e8f0' }}>
+            <strong style={{ color: '#63b3ed' }}>Session ID:</strong> {screeningData.sessionId}
           </div>
-          <div>
-            <strong>Assessment Date:</strong> {reportDate}
+          <div style={{ color: '#e2e8f0' }}>
+            <strong style={{ color: '#63b3ed' }}>Assessment Date:</strong> {reportDate}
           </div>
-          <div>
-            <strong>Session Duration:</strong> {sessionDuration}
+          <div style={{ color: '#e2e8f0' }}>
+            <strong style={{ color: '#63b3ed' }}>Session Duration:</strong> {sessionDuration}
           </div>
         </div>
       </div>
 
       {/* Executive Summary */}
       <div style={{ 
-        background: 'white', 
+        background: '#2d3748', 
         padding: 24, 
         borderRadius: 12, 
         marginBottom: 24,
-        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+        boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
+        border: '1px solid #4a5568'
       }}>
-        <h2 style={{ margin: '0 0 16px 0', color: '#333' }}>Executive Summary</h2>
+        <h2 style={{ margin: '0 0 16px 0', color: '#ffffff' }}>Executive Summary</h2>
         <div style={{ 
           padding: 16, 
           background: getRiskLevelColor(screeningData.screeningResults.riskLevel) + '20',
@@ -291,11 +295,11 @@ const MedicalReport: React.FC<MedicalReportProps> = ({ screeningData, onClose })
             }}>
               {screeningData.screeningResults.riskLevel.toUpperCase()} RISK
             </div>
-            <div style={{ fontSize: 18, fontWeight: 'bold' }}>
+            <div style={{ fontSize: 18, fontWeight: 'bold', color: '#ffffff' }}>
               Overall Score: {(screeningData.screeningResults.overallScore * 100).toFixed(1)}%
             </div>
           </div>
-          <p style={{ margin: 0, fontSize: 16, lineHeight: 1.6 }}>
+          <p style={{ margin: 0, fontSize: 16, lineHeight: 1.6, color: '#e2e8f0' }}>
             {getRiskLevelDescription(screeningData.screeningResults.riskLevel)}
           </p>
         </div>
@@ -303,35 +307,36 @@ const MedicalReport: React.FC<MedicalReportProps> = ({ screeningData, onClose })
 
       {/* Domain Scores */}
       <div style={{ 
-        background: 'white', 
+        background: '#2d3748', 
         padding: 24, 
         borderRadius: 12, 
         marginBottom: 24,
-        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+        boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
+        border: '1px solid #4a5568'
       }}>
-        <h3 style={{ margin: '0 0 16px 0', color: '#333' }}>Domain Analysis</h3>
+        <h3 style={{ margin: '0 0 16px 0', color: '#ffffff' }}>Domain Analysis</h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
-          <div style={{ padding: 16, background: '#f8f9fa', borderRadius: 8, textAlign: 'center' }}>
-            <h4 style={{ margin: '0 0 8px 0', color: '#007bff' }}>Social</h4>
-            <div style={{ fontSize: 24, fontWeight: 'bold', color: '#007bff' }}>
+          <div style={{ padding: 16, background: '#4a5568', borderRadius: 8, textAlign: 'center', border: '1px solid #718096' }}>
+            <h4 style={{ margin: '0 0 8px 0', color: '#63b3ed' }}>Social</h4>
+            <div style={{ fontSize: 24, fontWeight: 'bold', color: '#63b3ed' }}>
               {(screeningData.screeningResults.domains.social * 100).toFixed(0)}%
             </div>
           </div>
-          <div style={{ padding: 16, background: '#f8f9fa', borderRadius: 8, textAlign: 'center' }}>
-            <h4 style={{ margin: '0 0 8px 0', color: '#28a745' }}>Communication</h4>
-            <div style={{ fontSize: 24, fontWeight: 'bold', color: '#28a745' }}>
+          <div style={{ padding: 16, background: '#4a5568', borderRadius: 8, textAlign: 'center', border: '1px solid #718096' }}>
+            <h4 style={{ margin: '0 0 8px 0', color: '#68d391' }}>Communication</h4>
+            <div style={{ fontSize: 24, fontWeight: 'bold', color: '#68d391' }}>
               {(screeningData.screeningResults.domains.communication * 100).toFixed(0)}%
             </div>
           </div>
-          <div style={{ padding: 16, background: '#f8f9fa', borderRadius: 8, textAlign: 'center' }}>
-            <h4 style={{ margin: '0 0 8px 0', color: '#ffc107' }}>Behavior</h4>
-            <div style={{ fontSize: 24, fontWeight: 'bold', color: '#ffc107' }}>
+          <div style={{ padding: 16, background: '#4a5568', borderRadius: 8, textAlign: 'center', border: '1px solid #718096' }}>
+            <h4 style={{ margin: '0 0 8px 0', color: '#f6ad55' }}>Behavior</h4>
+            <div style={{ fontSize: 24, fontWeight: 'bold', color: '#f6ad55' }}>
               {(screeningData.screeningResults.domains.behavior * 100).toFixed(0)}%
             </div>
           </div>
-          <div style={{ padding: 16, background: '#f8f9fa', borderRadius: 8, textAlign: 'center' }}>
-            <h4 style={{ margin: '0 0 8px 0', color: '#17a2b8' }}>Sensory</h4>
-            <div style={{ fontSize: 24, fontWeight: 'bold', color: '#17a2b8' }}>
+          <div style={{ padding: 16, background: '#4a5568', borderRadius: 8, textAlign: 'center', border: '1px solid #718096' }}>
+            <h4 style={{ margin: '0 0 8px 0', color: '#81e6d9' }}>Sensory</h4>
+            <div style={{ fontSize: 24, fontWeight: 'bold', color: '#81e6d9' }}>
               {(screeningData.screeningResults.domains.sensory * 100).toFixed(0)}%
             </div>
           </div>
@@ -347,61 +352,64 @@ const MedicalReport: React.FC<MedicalReportProps> = ({ screeningData, onClose })
       }}>
         {/* Emotion Analysis */}
         <div style={{ 
-          background: 'white', 
+          background: '#2d3748', 
           padding: 24, 
           borderRadius: 12,
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+          boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
+          border: '1px solid #4a5568'
         }}>
-          <h3 style={{ margin: '0 0 16px 0', color: '#333' }}>Emotion Analysis</h3>
-          <div style={{ marginBottom: 12 }}>
-            <strong>Dominant Emotion:</strong> {screeningData.emotionAnalysis.dominantEmotion}
+          <h3 style={{ margin: '0 0 16px 0', color: '#ffffff' }}>Emotion Analysis</h3>
+          <div style={{ marginBottom: 12, color: '#e2e8f0' }}>
+            <strong style={{ color: '#63b3ed' }}>Dominant Emotion:</strong> {screeningData.emotionAnalysis.dominantEmotion}
           </div>
-          <div style={{ marginBottom: 12 }}>
-            <strong>Emotion Stability:</strong> {(screeningData.emotionAnalysis.emotionStability * 100).toFixed(1)}%
+          <div style={{ marginBottom: 12, color: '#e2e8f0' }}>
+            <strong style={{ color: '#63b3ed' }}>Emotion Stability:</strong> {(screeningData.emotionAnalysis.emotionStability * 100).toFixed(1)}%
           </div>
-          <div style={{ marginBottom: 12 }}>
-            <strong>Social Responses:</strong> {(screeningData.emotionAnalysis.socialEmotionResponses * 100).toFixed(1)}%
+          <div style={{ marginBottom: 12, color: '#e2e8f0' }}>
+            <strong style={{ color: '#63b3ed' }}>Social Responses:</strong> {(screeningData.emotionAnalysis.socialEmotionResponses * 100).toFixed(1)}%
           </div>
         </div>
 
         {/* Gesture Analysis */}
         <div style={{ 
-          background: 'white', 
+          background: '#2d3748', 
           padding: 24, 
           borderRadius: 12,
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+          boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
+          border: '1px solid #4a5568'
         }}>
-          <h3 style={{ margin: '0 0 16px 0', color: '#333' }}>Behavioral Analysis</h3>
-          <div style={{ marginBottom: 8 }}>
-            <strong>Repetitive Motions:</strong> {screeningData.gestureAnalysis.repetitiveMotions ? '✅ Detected' : '❌ Not detected'}
+          <h3 style={{ margin: '0 0 16px 0', color: '#ffffff' }}>Behavioral Analysis</h3>
+          <div style={{ marginBottom: 8, color: '#e2e8f0' }}>
+            <strong style={{ color: '#63b3ed' }}>Repetitive Motions:</strong> {screeningData.gestureAnalysis.repetitiveMotions ? '✅ Detected' : '❌ Not detected'}
           </div>
-          <div style={{ marginBottom: 8 }}>
-            <strong>Hand Flapping:</strong> {screeningData.gestureAnalysis.handFlapping ? '✅ Detected' : '❌ Not detected'}
+          <div style={{ marginBottom: 8, color: '#e2e8f0' }}>
+            <strong style={{ color: '#63b3ed' }}>Hand Flapping:</strong> {screeningData.gestureAnalysis.handFlapping ? '✅ Detected' : '❌ Not detected'}
           </div>
-          <div style={{ marginBottom: 8 }}>
-            <strong>Fidgeting:</strong> {screeningData.gestureAnalysis.fidgeting ? '✅ Detected' : '❌ Not detected'}
+          <div style={{ marginBottom: 8, color: '#e2e8f0' }}>
+            <strong style={{ color: '#63b3ed' }}>Fidgeting:</strong> {screeningData.gestureAnalysis.fidgeting ? '✅ Detected' : '❌ Not detected'}
           </div>
-          <div style={{ marginBottom: 8 }}>
-            <strong>Motor Coordination:</strong> {(screeningData.gestureAnalysis.motorCoordination * 100).toFixed(1)}%
+          <div style={{ marginBottom: 8, color: '#e2e8f0' }}>
+            <strong style={{ color: '#63b3ed' }}>Motor Coordination:</strong> {(screeningData.gestureAnalysis.motorCoordination * 100).toFixed(1)}%
           </div>
         </div>
 
         {/* Voice Analysis */}
         <div style={{ 
-          background: 'white', 
+          background: '#2d3748', 
           padding: 24, 
           borderRadius: 12,
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+          boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
+          border: '1px solid #4a5568'
         }}>
-          <h3 style={{ margin: '0 0 16px 0', color: '#333' }}>Communication Analysis</h3>
-          <div style={{ marginBottom: 8 }}>
-            <strong>Voice Emotion:</strong> {screeningData.voiceAnalysis.voiceEmotion}
+          <h3 style={{ margin: '0 0 16px 0', color: '#ffffff' }}>Communication Analysis</h3>
+          <div style={{ marginBottom: 8, color: '#e2e8f0' }}>
+            <strong style={{ color: '#63b3ed' }}>Voice Emotion:</strong> {screeningData.voiceAnalysis.voiceEmotion}
           </div>
-          <div style={{ marginBottom: 8 }}>
-            <strong>Communication Style:</strong> {(screeningData.voiceAnalysis.communicationStyle * 100).toFixed(1)}%
+          <div style={{ marginBottom: 8, color: '#e2e8f0' }}>
+            <strong style={{ color: '#63b3ed' }}>Communication Style:</strong> {(screeningData.voiceAnalysis.communicationStyle * 100).toFixed(1)}%
           </div>
-          <div style={{ marginBottom: 8 }}>
-            <strong>Speech Patterns:</strong> {screeningData.voiceAnalysis.speechPatterns.length > 0 ? 
+          <div style={{ marginBottom: 8, color: '#e2e8f0' }}>
+            <strong style={{ color: '#63b3ed' }}>Speech Patterns:</strong> {screeningData.voiceAnalysis.speechPatterns.length > 0 ? 
               screeningData.voiceAnalysis.speechPatterns.join(', ') : 'Typical patterns'
             }
           </div>
@@ -409,40 +417,42 @@ const MedicalReport: React.FC<MedicalReportProps> = ({ screeningData, onClose })
 
         {/* Eye Tracking Analysis */}
         <div style={{ 
-          background: 'white', 
+          background: '#2d3748', 
           padding: 24, 
           borderRadius: 12,
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+          boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
+          border: '1px solid #4a5568'
         }}>
-          <h3 style={{ margin: '0 0 16px 0', color: '#333' }}>Social Engagement</h3>
-          <div style={{ marginBottom: 8 }}>
-            <strong>Eye Contact Duration:</strong> {(screeningData.eyeTrackingAnalysis.eyeContactDuration * 100).toFixed(1)}%
+          <h3 style={{ margin: '0 0 16px 0', color: '#ffffff' }}>Social Engagement</h3>
+          <div style={{ marginBottom: 8, color: '#e2e8f0' }}>
+            <strong style={{ color: '#63b3ed' }}>Eye Contact Duration:</strong> {(screeningData.eyeTrackingAnalysis.eyeContactDuration * 100).toFixed(1)}%
           </div>
-          <div style={{ marginBottom: 8 }}>
-            <strong>Attention Span:</strong> {(screeningData.eyeTrackingAnalysis.attentionSpan * 100).toFixed(1)}%
+          <div style={{ marginBottom: 8, color: '#e2e8f0' }}>
+            <strong style={{ color: '#63b3ed' }}>Attention Span:</strong> {(screeningData.eyeTrackingAnalysis.attentionSpan * 100).toFixed(1)}%
           </div>
-          <div style={{ marginBottom: 8 }}>
-            <strong>Social Engagement:</strong> {(screeningData.eyeTrackingAnalysis.socialEngagement * 100).toFixed(1)}%
+          <div style={{ marginBottom: 8, color: '#e2e8f0' }}>
+            <strong style={{ color: '#63b3ed' }}>Social Engagement:</strong> {(screeningData.eyeTrackingAnalysis.socialEngagement * 100).toFixed(1)}%
           </div>
-          <div style={{ marginBottom: 8 }}>
-            <strong>Gaze Patterns:</strong> {screeningData.eyeTrackingAnalysis.gazePatterns.join(', ')}
+          <div style={{ marginBottom: 8, color: '#e2e8f0' }}>
+            <strong style={{ color: '#63b3ed' }}>Gaze Patterns:</strong> {screeningData.eyeTrackingAnalysis.gazePatterns.join(', ')}
           </div>
         </div>
       </div>
 
       {/* Charts Section */}
       <div style={{ 
-        background: 'white', 
+        background: '#2d3748', 
         padding: 24, 
         borderRadius: 12, 
         marginBottom: 24,
-        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+        boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
+        border: '1px solid #4a5568'
       }}>
-        <h2 style={{ margin: '0 0 24px 0', color: '#333' }}>Clinical Visualizations</h2>
+        <h2 style={{ margin: '0 0 24px 0', color: '#ffffff' }}>Clinical Visualizations</h2>
         
         {/* Domain Scores Bar Chart */}
         <div style={{ marginBottom: 32 }}>
-          <h3 style={{ margin: '0 0 16px 0', color: '#666' }}>Domain Performance Analysis</h3>
+          <h3 style={{ margin: '0 0 16px 0', color: '#e2e8f0' }}>Domain Performance Analysis</h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={domainScoresData}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -456,7 +466,7 @@ const MedicalReport: React.FC<MedicalReportProps> = ({ screeningData, onClose })
 
         {/* Radar Chart for Comprehensive Assessment */}
         <div style={{ marginBottom: 32 }}>
-          <h3 style={{ margin: '0 0 16px 0', color: '#666' }}>Comprehensive Assessment Profile</h3>
+          <h3 style={{ margin: '0 0 16px 0', color: '#e2e8f0' }}>Comprehensive Assessment Profile</h3>
           <ResponsiveContainer width="100%" height={300}>
             <RadarChart data={radarData}>
               <PolarGrid />
@@ -470,7 +480,7 @@ const MedicalReport: React.FC<MedicalReportProps> = ({ screeningData, onClose })
 
         {/* Voice Prosody Analysis */}
         <div style={{ marginBottom: 32 }}>
-          <h3 style={{ margin: '0 0 16px 0', color: '#666' }}>Voice Prosody Analysis</h3>
+          <h3 style={{ margin: '0 0 16px 0', color: '#e2e8f0' }}>Voice Prosody Analysis</h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={prosodyData}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -485,7 +495,7 @@ const MedicalReport: React.FC<MedicalReportProps> = ({ screeningData, onClose })
         {/* Emotion Timeline */}
         {emotionTimelineData.length > 0 && (
           <div>
-            <h3 style={{ margin: '0 0 16px 0', color: '#666' }}>Emotion Timeline</h3>
+            <h3 style={{ margin: '0 0 16px 0', color: '#e2e8f0' }}>Emotion Timeline</h3>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={emotionTimelineData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -502,24 +512,25 @@ const MedicalReport: React.FC<MedicalReportProps> = ({ screeningData, onClose })
 
       {/* Recommendations */}
       <div style={{ 
-        background: 'white', 
+        background: '#2d3748', 
         padding: 24, 
         borderRadius: 12, 
         marginBottom: 24,
-        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+        boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
+        border: '1px solid #4a5568'
       }}>
-        <h2 style={{ margin: '0 0 16px 0', color: '#333' }}>Clinical Recommendations</h2>
+        <h2 style={{ margin: '0 0 16px 0', color: '#ffffff' }}>Clinical Recommendations</h2>
         <div style={{ marginBottom: 20 }}>
-          <h4 style={{ color: '#666', marginBottom: 12 }}>Immediate Actions:</h4>
-          <ul style={{ paddingLeft: 20, lineHeight: 1.6 }}>
+          <h4 style={{ color: '#e2e8f0', marginBottom: 12 }}>Immediate Actions:</h4>
+          <ul style={{ paddingLeft: 20, lineHeight: 1.6, color: '#e2e8f0' }}>
             {screeningData.screeningResults.recommendations.map((rec, index) => (
               <li key={index} style={{ marginBottom: 8 }}>{rec}</li>
             ))}
           </ul>
         </div>
         <div>
-          <h4 style={{ color: '#666', marginBottom: 12 }}>Next Steps:</h4>
-          <ul style={{ paddingLeft: 20, lineHeight: 1.6 }}>
+          <h4 style={{ color: '#e2e8f0', marginBottom: 12 }}>Next Steps:</h4>
+          <ul style={{ paddingLeft: 20, lineHeight: 1.6, color: '#e2e8f0' }}>
             {screeningData.screeningResults.nextSteps.map((step, index) => (
               <li key={index} style={{ marginBottom: 8 }}>{step}</li>
             ))}
@@ -593,9 +604,9 @@ const MedicalReport: React.FC<MedicalReportProps> = ({ screeningData, onClose })
       <div style={{ 
         textAlign: 'center', 
         padding: 20, 
-        color: '#666', 
+        color: '#a0aec0', 
         fontSize: 14,
-        borderTop: '1px solid #dee2e6'
+        borderTop: '1px solid #4a5568'
       }}>
         <p style={{ margin: 0 }}>
           This report was generated by the ASD Screening Tool using AI-powered analysis.
