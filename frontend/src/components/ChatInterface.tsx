@@ -1,7 +1,7 @@
-import React, { useState, FormEvent, ChangeEvent, useEffect, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSpeechToText } from '../services/useSpeechToText';
-import { EmotionLogEntry } from '../services/reportGenerator';
+import { EmotionLogEntry } from '../types';
 import { ReasoningFactor } from './ReasoningVisualizer';
 import FaceEmotionTracker from './FaceEmotionTracker';
 import ReasoningVisualizer from './ReasoningVisualizer';
@@ -526,11 +526,11 @@ const ChatInterface: React.FC = () => {
     }
   };
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
   };
 
-  const handleSend = async (e: FormEvent) => {
+  const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 

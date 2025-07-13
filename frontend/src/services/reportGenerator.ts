@@ -1,10 +1,5 @@
 import { ConversationEntry } from './adaptiveEngine';
-
-export interface EmotionLogEntry {
-  timestamp: Date;
-  emotionLabel: string;
-  confidence: number;
-}
+import { EmotionLogEntry } from '../types';
 
 export interface RepetitiveMotionSummary {
   classification: 'HIGH' | 'MEDIUM' | 'LOW' | 'NONE';

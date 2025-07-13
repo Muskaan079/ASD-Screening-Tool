@@ -1,5 +1,7 @@
-import { EmotionLogEntry } from '../pages/Report';
 import { ConversationEntry } from './adaptiveEngine';
+import { EmotionLogEntry } from '../types';
+
+// Removed local EmotionLogEntry interface, now using shared one
 
 export interface VisualizationData {
   emotionTrends: EmotionTrendData[];
