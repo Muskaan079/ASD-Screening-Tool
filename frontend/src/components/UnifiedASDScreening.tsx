@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import apiService, { type EmotionData, type MotionData, type VoiceData } from '../services/api';
 import mlService, { type EmotionAnalysis, type GestureAnalysis, type VoiceAnalysis } from '../services/mlService';
 import { useSpeechToText } from '../services/useSpeechToText';
@@ -124,6 +125,7 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
   onScreeningComplete,
   sessionDuration = 300
 }) => {
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [isScreening, setIsScreening] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -890,14 +892,11 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
     };
   }, [isScreening, analyzeEmotion, analyzeGesture, analyzeVoice]);
 
-  // Show report if comprehensive data is available
+  // Redirect to report page if comprehensive data is available
   if (showReport && screeningData) {
-    return (
-      <MedicalReport 
-        screeningData={screeningData} 
-        onClose={() => setShowReport(false)} 
-      />
-    );
+    // Navigate to report page with session ID
+    window.location.href = `/report?sessionId=${screeningData.sessionId}`;
+    return null;
   }
 
   // Enhanced session completion with comprehensive data
@@ -1039,6 +1038,9 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
         setCurrentPhase('complete');
         setStatus('Screening complete');
 
+        // Store data in localStorage for the report page
+        localStorage.setItem(`screening_${sessionId}`, JSON.stringify(comprehensiveData));
+
         if (onScreeningComplete) {
           onScreeningComplete(comprehensiveData);
         }
@@ -1047,16 +1049,6 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
       }
     }
   }, [sessionId, sessionDuration, timeRemaining, patientInfo, emotionData, motionData, voiceData, eyeTrackingData, userInfo, emotionHistory, gestureHistory, voiceHistory, eyeTrackingHistory, onScreeningComplete]);
-
-  // Show report if comprehensive data is available
-  if (showReport && screeningData) {
-    return (
-      <MedicalReport 
-        screeningData={screeningData} 
-        onClose={() => setShowReport(false)} 
-      />
-    );
-  }
 
   if (isLoading) {
     return (
@@ -1134,8 +1126,20 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
       
       <h1 style={{ textAlign: 'center', marginBottom: 20 }}>🧠 Comprehensive ASD Screening</h1>
       
-      {/* Test Report Button - Remove this later */}
+      {/* Test Report Button - Professional Medical Report Demo */}
       <div style={{ textAlign: 'center', marginBottom: 20 }}>
+        <div style={{ 
+          padding: 16, 
+          background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)',
+          borderRadius: 12,
+          color: 'white',
+          marginBottom: 16
+        }}>
+          <h3 style={{ margin: '0 0 8px 0', fontSize: 18 }}>🧪 Test Professional Medical Report</h3>
+          <p style={{ margin: 0, fontSize: 14, opacity: 0.9 }}>
+            Click below to view a comprehensive medical report with charts, analysis, and clinical recommendations
+          </p>
+        </div>
         <button
           onClick={() => {
             const testData: ASDScreeningData = {
@@ -1146,7 +1150,14 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
               duration: 300,
               emotionAnalysis: {
                 dominantEmotion: 'neutral',
-                emotionHistory: [],
+                emotionHistory: [
+                  { emotion: 'happy', confidence: 0.8, timestamp: new Date(Date.now() - 240000) },
+                  { emotion: 'neutral', confidence: 0.9, timestamp: new Date(Date.now() - 180000) },
+                  { emotion: 'surprised', confidence: 0.7, timestamp: new Date(Date.now() - 120000) },
+                  { emotion: 'neutral', confidence: 0.8, timestamp: new Date(Date.now() - 60000) },
+                  { emotion: 'sad', confidence: 0.6, timestamp: new Date(Date.now() - 30000) },
+                  { emotion: 'neutral', confidence: 0.7, timestamp: new Date() }
+                ],
                 emotionStability: 0.7,
                 socialEmotionResponses: 0.6
               },
@@ -1154,26 +1165,56 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
                 repetitiveMotions: false,
                 handFlapping: false,
                 rockingMotion: false,
-                fidgeting: false,
-                gestureHistory: [],
+                fidgeting: true,
+                gestureHistory: [
+                  { type: 'normal_movement', confidence: 0.8, timestamp: new Date(Date.now() - 240000) },
+                  { type: 'fidgeting', confidence: 0.6, timestamp: new Date(Date.now() - 180000) },
+                  { type: 'normal_movement', confidence: 0.9, timestamp: new Date(Date.now() - 120000) },
+                  { type: 'fidgeting', confidence: 0.7, timestamp: new Date(Date.now() - 60000) },
+                  { type: 'normal_movement', confidence: 0.8, timestamp: new Date(Date.now() - 30000) },
+                  { type: 'fidgeting', confidence: 0.5, timestamp: new Date() }
+                ],
                 motorCoordination: 0.8
               },
               voiceAnalysis: {
-                prosody: { pitch: 0.5, volume: 0.5, speechRate: 0.5, clarity: 0.5 },
+                prosody: { pitch: 0.6, volume: 0.7, speechRate: 0.5, clarity: 0.8 },
                 voiceEmotion: 'neutral',
-                speechPatterns: [],
-                voiceHistory: [],
+                speechPatterns: ['clear', 'typical', 'consistent'],
+                voiceHistory: [
+                  { text: 'Hello, how are you?', emotion: 'neutral', confidence: 0.7, timestamp: new Date(Date.now() - 240000) },
+                  { text: 'I like playing with toys', emotion: 'happy', confidence: 0.8, timestamp: new Date(Date.now() - 180000) },
+                  { text: 'What is that?', emotion: 'surprised', confidence: 0.6, timestamp: new Date(Date.now() - 120000) },
+                  { text: 'I want to go home', emotion: 'sad', confidence: 0.5, timestamp: new Date(Date.now() - 60000) },
+                  { text: 'Thank you', emotion: 'neutral', confidence: 0.9, timestamp: new Date() }
+                ],
                 communicationStyle: 0.7
               },
               eyeTrackingAnalysis: {
                 eyeContactDuration: 0.6,
-                gazePatterns: ['focused'],
+                gazePatterns: ['focused', 'responsive', 'attentive'],
                 attentionSpan: 0.7,
                 socialEngagement: 0.6,
                 eyeTrackingHistory: []
               },
               textAnalysis: {
-                responses: [],
+                responses: [
+                  {
+                    questionId: 'social_1',
+                    question: 'How do you feel about meeting new people?',
+                    answer: 'Sometimes nervous',
+                    responseTime: 3.2,
+                    confidence: 0.8,
+                    analysis: { score: 0.7, interpretation: 'Moderate social comfort', domain: 'social' }
+                  },
+                  {
+                    questionId: 'comm_1',
+                    question: 'Do you enjoy conversations?',
+                    answer: 'Yes, with friends',
+                    responseTime: 2.1,
+                    confidence: 0.9,
+                    analysis: { score: 0.8, interpretation: 'Good communication skills', domain: 'communication' }
+                  }
+                ],
                 languageComplexity: 0.7,
                 socialUnderstanding: 0.6
               },
@@ -1193,25 +1234,47 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
                   behavior: 0.8,
                   sensory: 0.7
                 },
-                recommendations: ['Continue monitoring', 'Follow up in 3 months'],
-                nextSteps: ['Schedule assessment', 'Monitor development']
+                recommendations: [
+                  'Continue monitoring developmental progress',
+                  'Consider follow-up screening in 3-6 months',
+                  'Provide developmental support as needed',
+                  'Monitor social interaction patterns',
+                  'Encourage communication development'
+                ],
+                nextSteps: [
+                  'Schedule follow-up assessment in 3-6 months',
+                  'Monitor for any changes in behavior or development',
+                  'Consider early intervention if concerns persist',
+                  'Maintain regular developmental surveillance',
+                  'Provide parent education and support'
+                ]
               }
             };
-            setScreeningData(testData);
-            setShowReport(true);
+            localStorage.setItem(`screening_${testData.sessionId}`, JSON.stringify(testData));
+            window.location.href = `/report?sessionId=${testData.sessionId}`;
           }}
           style={{
-            padding: '8px 16px',
-            background: '#ffc107',
-            color: 'black',
+            padding: '16px 32px',
+            background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)',
+            color: 'white',
             border: 'none',
-            borderRadius: 4,
-            fontSize: 12,
+            borderRadius: 50,
+            fontSize: 16,
+            fontWeight: 'bold',
             cursor: 'pointer',
-            marginRight: 8
+            boxShadow: '0 8px 16px rgba(255, 107, 107, 0.3)',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 12px 24px rgba(255, 107, 107, 0.4)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 8px 16px rgba(255, 107, 107, 0.3)';
           }}
         >
-          🧪 Test Report
+          📊 Generate Professional Medical Report
         </button>
       </div>
       
@@ -1459,7 +1522,12 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
               Create a comprehensive report with charts, analysis, and clinical recommendations
             </p>
             <button
-              onClick={() => setShowReport(true)}
+              onClick={() => {
+                if (screeningData) {
+                  localStorage.setItem(`screening_${screeningData.sessionId}`, JSON.stringify(screeningData));
+                  window.location.href = `/report?sessionId=${screeningData.sessionId}`;
+                }
+              }}
               style={{
                 padding: '16px 32px',
                 background: 'rgba(255, 255, 255, 0.2)',
@@ -1592,7 +1660,12 @@ const UnifiedASDScreening: React.FC<UnifiedASDScreeningProps> = ({
           {/* Report Generation Button */}
           <div style={{ textAlign: 'center', marginTop: 32 }}>
             <button
-              onClick={() => setShowReport(true)}
+              onClick={() => {
+                if (screeningData) {
+                  localStorage.setItem(`screening_${screeningData.sessionId}`, JSON.stringify(screeningData));
+                  window.location.href = `/report?sessionId=${screeningData.sessionId}`;
+                }
+              }}
               style={{
                 padding: '16px 32px',
                 background: 'linear-gradient(135deg, #007bff 0%, #0056b3 100%)',

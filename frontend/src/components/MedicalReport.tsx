@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { jsPDF } from 'jspdf';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 
 interface ASDScreeningData {
   patientInfo: {
@@ -112,6 +113,38 @@ const MedicalReport: React.FC<MedicalReportProps> = ({ screeningData, onClose })
     const seconds = duration % 60;
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   }, [screeningData.duration]);
+
+  // Chart data preparation
+  const domainScoresData = useMemo(() => [
+    { name: 'Social', score: screeningData.screeningResults.domains.social * 100, fill: '#8884d8' },
+    { name: 'Communication', score: screeningData.screeningResults.domains.communication * 100, fill: '#82ca9d' },
+    { name: 'Behavior', score: screeningData.screeningResults.domains.behavior * 100, fill: '#ffc658' },
+    { name: 'Sensory', score: screeningData.screeningResults.domains.sensory * 100, fill: '#ff7300' }
+  ], [screeningData.screeningResults.domains]);
+
+  const radarData = useMemo(() => [
+    { subject: 'Social Skills', A: screeningData.screeningResults.domains.social * 100, fullMark: 100 },
+    { subject: 'Communication', A: screeningData.screeningResults.domains.communication * 100, fullMark: 100 },
+    { subject: 'Behavioral', A: screeningData.screeningResults.domains.behavior * 100, fullMark: 100 },
+    { subject: 'Sensory', A: screeningData.screeningResults.domains.sensory * 100, fullMark: 100 },
+    { subject: 'Motor Skills', A: screeningData.gestureAnalysis.motorCoordination * 100, fullMark: 100 },
+    { subject: 'Attention', A: screeningData.eyeTrackingAnalysis.attentionSpan * 100, fullMark: 100 }
+  ], [screeningData]);
+
+  const emotionTimelineData = useMemo(() => {
+    return screeningData.emotionAnalysis.emotionHistory.map((entry, index) => ({
+      time: index,
+      emotion: entry.emotion,
+      confidence: entry.confidence * 100
+    }));
+  }, [screeningData.emotionAnalysis.emotionHistory]);
+
+  const prosodyData = useMemo(() => [
+    { name: 'Pitch', value: screeningData.voiceAnalysis.prosody.pitch * 100 },
+    { name: 'Volume', value: screeningData.voiceAnalysis.prosody.volume * 100 },
+    { name: 'Speech Rate', value: screeningData.voiceAnalysis.prosody.speechRate * 100 },
+    { name: 'Clarity', value: screeningData.voiceAnalysis.prosody.clarity * 100 }
+  ], [screeningData.voiceAnalysis.prosody]);
 
   const generatePDF = () => {
     const doc = new jsPDF();
@@ -395,6 +428,76 @@ const MedicalReport: React.FC<MedicalReportProps> = ({ screeningData, onClose })
             <strong>Gaze Patterns:</strong> {screeningData.eyeTrackingAnalysis.gazePatterns.join(', ')}
           </div>
         </div>
+      </div>
+
+      {/* Charts Section */}
+      <div style={{ 
+        background: 'white', 
+        padding: 24, 
+        borderRadius: 12, 
+        marginBottom: 24,
+        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+      }}>
+        <h2 style={{ margin: '0 0 24px 0', color: '#333' }}>Clinical Visualizations</h2>
+        
+        {/* Domain Scores Bar Chart */}
+        <div style={{ marginBottom: 32 }}>
+          <h3 style={{ margin: '0 0 16px 0', color: '#666' }}>Domain Performance Analysis</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={domainScoresData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip formatter={(value) => [`${value}%`, 'Score']} />
+              <Bar dataKey="score" fill="#8884d8" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Radar Chart for Comprehensive Assessment */}
+        <div style={{ marginBottom: 32 }}>
+          <h3 style={{ margin: '0 0 16px 0', color: '#666' }}>Comprehensive Assessment Profile</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <RadarChart data={radarData}>
+              <PolarGrid />
+              <PolarAngleAxis dataKey="subject" />
+              <PolarRadiusAxis angle={90} domain={[0, 100]} />
+              <Radar name="Assessment Score" dataKey="A" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+              <Tooltip formatter={(value) => [`${value}%`, 'Score']} />
+            </RadarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Voice Prosody Analysis */}
+        <div style={{ marginBottom: 32 }}>
+          <h3 style={{ margin: '0 0 16px 0', color: '#666' }}>Voice Prosody Analysis</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={prosodyData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip formatter={(value) => [`${value}%`, 'Score']} />
+              <Bar dataKey="value" fill="#82ca9d" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Emotion Timeline */}
+        {emotionTimelineData.length > 0 && (
+          <div>
+            <h3 style={{ margin: '0 0 16px 0', color: '#666' }}>Emotion Timeline</h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={emotionTimelineData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="time" />
+                <YAxis />
+                <Tooltip formatter={(value) => [`${value}%`, 'Confidence']} />
+                <Legend />
+                <Line type="monotone" dataKey="confidence" stroke="#8884d8" strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        )}
       </div>
 
       {/* Recommendations */}
